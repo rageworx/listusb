@@ -1,5 +1,5 @@
 # listusb
-A detailed listing USB device for macOS shell(console).
+A tool that detailed listing USB device for macOS shell(console).
 
 ## What is listusb
 * macOS don't have tool to what USB device connected in shell.
