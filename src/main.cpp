@@ -6,6 +6,8 @@
 #include <cstring>
 #include <cstdint>
 
+#define VERSION_STR     "0.0.1.2"
+
 static libusb_context* libusbctx = NULL;
 
 void prtUSBclass( uint8_t id, uint8_t subid )
@@ -262,6 +264,8 @@ size_t listdevs()
 
 int main( int argc, char** argv )
 {
+    printf( "listusb, version %s, (C)Copyrighted 2023 Raphael Kim\n", VERSION_STR );
+
     libusb_init( &libusbctx );
 
     size_t devs = listdevs();

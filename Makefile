@@ -120,7 +120,7 @@ $(TARGETBIN): $(OBJS)
 	@echo "done."
 
 install:
-	@echo "Install ... "
+	@echo "Install to $(INSTALLDIR) ... "
 	@cp -f $(TARGETBIN) $(INSTALLDIR)
 
 uninstall:
