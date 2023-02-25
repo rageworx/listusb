@@ -1,58 +1,103 @@
 #include <unistd.h>
+#include <getopt.h>
 #include <libusb.h>
+#include <version.h>
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cstdint>
+#include <cerrno>
 
-#define VERSION_STR     "0.0.1.2"
+#define ME_STR          "listusb"
+#define VERSION_STR     "0.1.0.4"
 
-static libusb_context* libusbctx = NULL;
+static struct option long_opts[] = {
+    { "help",           no_argument,        0, 'h' },
+    { "simple",         no_argument,        0, 's' },
+    { "version",        no_argument,        0, 'v' },
+    { "color",          no_argument,        0, 'c' },
+    { NULL, 0, 0, 0 }
+};
+
+static uint32_t        optpar_simple    = 0;
+static uint32_t        optpar_color     = 0;
+static libusb_context* libusbctx        = NULL;
 
 void prtUSBclass( uint8_t id, uint8_t subid )
 {
-    printf( "CLASS=" );
+    if ( optpar_simple == 0 )
+        printf( "Class = " );
+    else
+        printf( "cls=" );
 
     switch( id )
     {
         case LIBUSB_CLASS_PER_INTERFACE:
-            if ( subid > 0 )
+            if ( ( subid > 0 ) && ( optpar_simple == 0 ) )
             {
                 printf( "PER interface %02X device.\n", subid );
+            }
+            else
+            {
+                printf( "PER/%02X;", subid ); 
             }
             break;
 
         case LIBUSB_CLASS_AUDIO:
-            printf( "audio device" );
+            if ( optpar_simple == 0 )
+                printf( "audio device" );
+            else
+                printf( "audio;" );
             break;
 
         case LIBUSB_CLASS_COMM:
-            printf( "communicating device" );
+            if ( optpar_simple == 0 )
+                printf( "communicating device" );
+            else
+                printf( "communicating;" );
             break;
 
         case LIBUSB_CLASS_HID:
-            printf( "Human Interface Device" );
+            if ( optpar_simple == 0 )
+                printf( "Human Interface Device" );
+            else
+                printf( "HID;" );
             break;
 
         case LIBUSB_CLASS_PHYSICAL:
-            printf( "Physical device" );
+            if ( optpar_simple == 0 )
+                printf( "Physical device" );
+            else
+                printf( "physical;" );
             break;
 
         case LIBUSB_CLASS_IMAGE:
-            printf( "Imaging device" );
+            if ( optpar_simple == 0 )
+                printf( "Imaging device" );
+            else
+                printf( "image;" );
             break;
 
         case LIBUSB_CLASS_PRINTER:
-            printf( "Printing device" );
+            if ( optpar_simple == 0 )
+                printf( "Printing device" );
+            else
+                printf( "printer;" );
             break;
 
         case LIBUSB_CLASS_MASS_STORAGE:
-            printf( "Mass storage device" );
+            if ( optpar_simple == 0 )
+                printf( "Mass storage device" );
+            else
+                printf( "mass_storage;" );
             break;
 
         case LIBUSB_CLASS_HUB:
-            printf( "HUB device" );
+            if ( optpar_simple == 0 )
+                printf( "HUB device" );
+            else
+                printf( "HUB;" );
             break;
 
         case LIBUSB_CLASS_DATA:
@@ -84,7 +129,10 @@ void prtUSBclass( uint8_t id, uint8_t subid )
             break;
 
         case LIBUSB_CLASS_MISCELLANEOUS:
-            printf( "Miscellaneous device" );
+            if ( optpar_simple == 0 )
+                printf( "Miscellaneous device" );
+            else
+                printf( "misc.;" );
             break;
 
         case LIBUSB_CLASS_APPLICATION:
@@ -96,11 +144,15 @@ void prtUSBclass( uint8_t id, uint8_t subid )
             break;
 
         default:
-            printf( "Unknown %02X class type device", id );
+            if ( optpar_simple == 0 )
+                printf( "Unknown %02X class type device", id );
+            else
+                printf( "%02X;", id );
             break;
     }
 
-    printf( "\n" );
+    if ( optpar_simple == 0 )
+        printf( "\n" );
 }
 
 const char* bcd2human( uint16_t id )
@@ -110,7 +162,10 @@ const char* bcd2human( uint16_t id )
     uint8_t hv = id >> 8;
     uint8_t lv = ( id & 0x00F0 ) >> 4;
 
-    snprintf( retstr, 16, "USB %u.%u", hv, lv );
+    if ( optpar_simple == 0 )
+        snprintf( retstr, 16, "USB %u.%u", hv, lv );
+    else
+        snprintf( retstr, 16, "%u.%u", hv, lv );
 
     return retstr;
 }
@@ -129,15 +184,22 @@ void prtUSBConfig( libusb_device_handle* dev, uint8_t idx, uint16_t bcd, libusb_
         }
 
         if ( strlen( (const char*)cfgstr ) > 0 )
-        {    
-            printf( "    + config[%2u] : %s, ", idx, (const char*)cfgstr );
+        {
+            if ( optpar_simple == 0 )
+                printf( "    + config[%2u] : %s, ", idx, (const char*)cfgstr );
         }
         else
+        if ( optpar_simple == 0 )
         {
-            printf( "    + config[%2u] , ", idx );
+            printf( "    + config[%2u], ", idx );
         }
-        printf( "interfaces=%u, ", cfg->bNumInterfaces );
-        printf( "ID=0x%02X, ", cfg->bConfigurationValue );
+
+        if ( optpar_simple == 0 )
+        {
+            printf( "interfaces = %u, ", cfg->bNumInterfaces );
+            printf( "ID = 0x%02X, ", cfg->bConfigurationValue );
+        }
+
         uint32_t pwrCalc = cfg->MaxPower;
         if ( bcd > 0x0300 )
         {
@@ -147,7 +209,11 @@ void prtUSBConfig( libusb_device_handle* dev, uint8_t idx, uint16_t bcd, libusb_
         {
             pwrCalc *= 2;
         }
-        printf( "max req. power=%u mA\n", pwrCalc );
+
+        if ( optpar_simple == 0 )
+            printf( "max required power = %u mA\n", pwrCalc );
+        else
+            printf( "MRP=%u(mA)\n", pwrCalc );
     }
 }
 
@@ -171,8 +237,15 @@ size_t listdevs()
 
             if ( libusb_get_device_descriptor( device, &desc ) == 0 )
             {
-                printf( "Device VID:PID [%04X:%04X] ", 
-                        desc.idVendor, desc.idProduct );
+                if ( optpar_simple == 0 )
+                {
+                    printf( "Device VID:PID [%04X:%04X] ", 
+                            desc.idVendor, desc.idProduct );
+                }
+                else
+                {
+                    printf( "[%04X:%04X];", desc.idVendor, desc.idProduct );
+                }
                 // open device ..
                 int usberr = libusb_open( device, &dev );
                 if ( usberr == 0 )
@@ -196,47 +269,81 @@ size_t listdevs()
 
                 if ( strlen( (const char*)dev_mn ) > 0 )
                 {
-                    printf( "%s, ", (const char*)dev_mn );
+                    if ( optpar_simple == 0 )
+                        printf( "%s, ", (const char*)dev_mn );
+                    else
+                        printf( "%s;" , (const char*)dev_mn );
                 }
                 else
                 {
-                    printf( "(no manufacturer)" );
+                    if ( optpar_simple == 0 )
+                        printf( "(no manufacturer)" );
+                    else
+                        printf( ";" );
                 }
 
 
                 if ( strlen( (const char*)dev_pn ) > 0 )
                 {
-                    printf( "%s\n", (const char*)dev_pn );
+                    if ( optpar_simple == 0)
+                        printf( "%s\n", (const char*)dev_pn );
+                    else
+                        printf( "%s;", (const char*)dev_pn );
                 }
                 else
                 {
-                    printf( "(no product name)\n" );
+                    if ( optpar_simple == 0 )
+                        printf( "(no product name)\n" );
+                    else
+                        printf( ";" );
                 }
 
-                printf( "    + " );
+                if ( optpar_simple == 0 )
+                    printf( "    + " );
 
                 if ( strlen( (const char*)dev_sn ) > 0 )
                 {
-                    printf( "Serial number = %s\n", (const char*)dev_sn );
+                    if ( optpar_simple == 0 )
+                        printf( "Serial number = %s\n", (const char*)dev_sn );
+                    else
+                        printf( "%s;", (const char*)dev_sn );
                 }
                 else
                 {
-                    printf( "(SN not found)\n" );
+                    if ( optpar_simple == 0 )
+                        printf( "(SN not found)\n" );
+                    else
+                        printf( ";" ); 
                 }
 
                 if ( ( desc.bDeviceClass > 0 ) 
                         || ( desc.bDeviceSubClass > 0 ) )
                 {
-                    printf( "    + " );
+                    if ( optpar_simple == 0 )
+                        printf( "    + " );
+
                     prtUSBclass( desc.bDeviceClass, desc.bDeviceSubClass );
                 }
+                else
+                if ( optpar_simple == 1 )
+                {
+                    printf( "cls=none;" );
+                }
 
-                printf( "    + " );
+                if ( optpar_simple == 0 )
+                    printf( "    + " );
+
                 uint16_t l16bcdID = libusb_cpu_to_le16( desc.bcdUSB );
-                printf( "bcdID=%04X, human readable = %s", l16bcdID,
-                        bcd2human( l16bcdID ) );
-
-                printf( "\n" );
+                if ( optpar_simple == 0 )
+                {
+                    printf( "bcdID = %04X, human readable = %s", l16bcdID,
+                            bcd2human( l16bcdID ) );
+                    printf( "\n" );
+                }
+                else
+                {
+                    printf( "bcdID=%04X(%s);", l16bcdID, bcd2human( l16bcdID ) );
+                }
 
                 // get config
                 if ( desc.bNumConfigurations > 0 )
@@ -262,17 +369,80 @@ size_t listdevs()
     return devscnt;
 }
 
+void showHelp()
+{
+    const char shortusage[] = \
+"Usage: listusb [-v] [-s]\n"
+"\n"
+"  -v,--version        display version only and quit.\n"
+"  -s,--simple         display information as short as can.\n"
+"  -c,--color          display with xterm-color escape codes.\n";
+
+    fprintf( stdout, "%s\n", shortusage );    
+}
+
+void showVersion()
+{
+    printf( "%s version %s, libusb version %d.%d.%d\n", 
+            ME_STR, VERSION_STR, LIBUSB_MAJOR, LIBUSB_MINOR, LIBUSB_MICRO );
+}
+
 int main( int argc, char** argv )
 {
-    printf( "listusb, version %s, (C)Copyrighted 2023 Raphael Kim\n", VERSION_STR );
+    // getopt
+    for(;;)
+    {
+        int optidx = 0;
+        int opt = getopt_long( argc, argv, 
+                               " :hvs",
+                               long_opts, &optidx );
+        if ( opt >= 0 )
+        {
+            switch( (char)opt )
+            {
+                default:
+                case 'h':
+                    showHelp();
+                    return 0;
+
+                case 'v':
+                    showVersion();
+                    return 0;
+
+                case 's':
+                    optpar_simple = 1;
+                    break;
+
+                case 'c':
+                    optpar_color = 1;
+                    break;
+            }
+        }
+        else
+            break;
+    } /// of for( == )
+
+    if ( optpar_simple == 0 ) \
+    printf( "%s, version %s, (C)Copyrighted 2023 Raphael Kim, w/ libusb %d.%d.%d\n", 
+            ME_STR, VERSION_STR, LIBUSB_MAJOR, LIBUSB_MINOR, LIBUSB_MICRO );
 
     libusb_init( &libusbctx );
 
-    size_t devs = listdevs();
+    if ( libusbctx != NULL )
+    {
+        size_t devs = listdevs();
 
-    fflush( stdout );
+        if ( ( devs > 0 ) && ( optpar_simple == 0 ) )
+            printf( "total %zu devices found.\n", devs );
 
-    libusb_exit( libusbctx );
+        fflush( stdout );
+
+        libusb_exit( libusbctx );
+    }
+    else
+    {
+        fprintf( stderr, "libusb context should not initialized.\n" );
+    }
 
     return 0;
 }
