@@ -10,7 +10,7 @@
 #include <cerrno>
 
 #define ME_STR          "listusb"
-#define VERSION_STR     "0.1.0.4"
+#define VERSION_STR     "0.1.0.5"
 
 static struct option long_opts[] = {
     { "help",           no_argument,        0, 'h' },
@@ -101,31 +101,52 @@ void prtUSBclass( uint8_t id, uint8_t subid )
             break;
 
         case LIBUSB_CLASS_DATA:
-            printf( "Data device" );
+            if ( optpar_simple == 0 )
+                printf( "Data device" );
+            else
+                printf( "data;" );
             break;
 
         case LIBUSB_CLASS_SMART_CARD:
-            printf( "Smart Card device" );
+            if ( optpar_simple == 0 )
+                printf( "Smart Card device" );
+            else
+                printf( "smartcard;" );
             break;
 
         case LIBUSB_CLASS_CONTENT_SECURITY:
-            printf( "Content Security device" );
+            if ( optpar_simple == 0 )
+                printf( "Content Security device" );
+            else
+                printf( "content_security;" );
             break;
 
         case LIBUSB_CLASS_VIDEO:
-            printf( "Video device" );
+            if ( optpar_simple == 0 )
+                printf( "Video device" );
+            else
+                printf( "video;" );
             break;
 
         case LIBUSB_CLASS_PERSONAL_HEALTHCARE:
-            printf( "Personal Healthcare device" );
+            if ( optpar_simple == 0 )
+                printf( "Personal Healthcare device" );
+            else
+                printf( "personal_healthcare;" );
             break;
 
         case LIBUSB_CLASS_DIAGNOSTIC_DEVICE:
-            printf( "Diagnositc device" );
+            if ( optpar_simple == 0 )
+                printf( "Diagnositc device" );
+            else
+                printf( "diagnostic;" );
             break;
 
         case LIBUSB_CLASS_WIRELESS:
-            printf( "Wireless device" );
+            if ( optpar_simple == 0 )
+                printf( "Wireless device" );
+            else
+                printf( "wireless;" );
             break;
 
         case LIBUSB_CLASS_MISCELLANEOUS:
@@ -136,11 +157,17 @@ void prtUSBclass( uint8_t id, uint8_t subid )
             break;
 
         case LIBUSB_CLASS_APPLICATION:
-            printf( "Application device" );
+            if ( optpar_simple == 0 )
+                printf( "Application device" );
+            else
+                printf( "application;" );
             break;
 
         case LIBUSB_CLASS_VENDOR_SPEC:
-            printf( "Vendor-Specific device" );
+            if ( optpar_simple == 0 )
+                printf( "Vendor-Specific device" );
+            else
+                printf( "vendor-spec;" );
             break;
 
         default:

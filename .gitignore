@@ -34,3 +34,4 @@
 # Local
 bin/
 obj/
+.DS_Store
