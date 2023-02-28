@@ -124,7 +124,7 @@ install:
 	@cp -f $(TARGETBIN) $(INSTALLDIR)
 
 uninstall:
-	@ecoh "Unintalling ..."
+	@echo "Unintalling ..."
 	@rm -f $(INSTALLDIR)/$(TARGET_PKG)
 
 UNSUPPORTED:
