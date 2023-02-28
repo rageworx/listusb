@@ -10,31 +10,32 @@ A tool that detailed listing USB device for macOS shell(console).
 * Build source, and install to user space, then type `listusb`.
 ```
 >  listusb
+listusb, version 0.1.0.5, (C)Copyrighted 2023 Raphael Kim, w/ libusb 1.0.26
 Device VID:PID [152D:0583] JMicron, USB to PCIE Bridge
     + Serial number = 0123456789ABCDEF
-    + bcdID=0210, human readable = USB 2.1
-    + config[ 0] , interfaces=1, ID=0x01, max req. power=500 mA
+    + bcdID = 0210, human readable = USB 2.1
+    + config[ 0], interfaces = 1, ID = 0x01, max required power = 500 mA
 Device VID:PID [0BDA:9210] Realtek, RTL9210
     + Serial number = 012345679021
-    + bcdID=0320, human readable = USB 3.2
-    + config[ 0] , interfaces=1, ID=0x01, max req. power=896 mA
+    + bcdID = 0320, human readable = USB 3.2
+    + config[ 0], interfaces = 1, ID = 0x01, max required power = 896 mA
 Device VID:PID [05E3:0610] GenesysLogic, USB2.0 Hub
     + (SN not found)
-    + CLASS=HUB device
+    + CLASS = HUB device
     + bcdID=0210, human readable = USB 2.1
-    + config[ 0] , interfaces=1, ID=0x01, max req. power=100 mA
+    + config[ 0], interfaces = 1, ID = 0x01, max required power = 100 mA
 Device VID:PID [05E3:0612] GenesysLogic, USB3.0 Hub
     + (SN not found)
-    + CLASS=HUB device
-    + bcdID=0300, human readable = USB 3.0
-    + config[ 0] , interfaces=1, ID=0x01, max req. power=0 mA
+    + CLASS = HUB device
+    + bcdID = 0300, human readable = USB 3.0
+    + config[ 0], interfaces=1, ID = 0x01, max required power = 0 mA
 ```
 * In case of un-successful recognization of NVMe SSD, as like above,
 * There's same USB VID:PID HUB, but one is USB 3.0, and another is USB 2.1.
 * This case is one of NVMe SSD enclosure failed to recognized as USB3 device, as like JMicron USB to PCIE Bridge - it shows USB 2.1 and power consume to 500mAh not as USB3.
 
 ## Manual configuration
-* edit .config to where is libusb-1.0.26
+* edit `.config` file to where is libusb-1.0.26
 
 ## Reuired external library,
 ### libusb-1.0.26
