@@ -2,6 +2,7 @@
 #include <getopt.h>
 #include <libusb.h>
 #include <version.h>
+#include <version_nano.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -294,7 +295,7 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
                     printf( "\033[93m" );
                 }
 
-                printf( "%s, ", idx, (const char*)cfgstr );
+                printf( "%s, ", (const char*)cfgstr );
             }
         }
         else
@@ -983,10 +984,14 @@ int main( int argc, char** argv )
         printf( "\n" );
     }
 
+#if (LIBUSB_NANO>11780)
     libusb_init_option lusbopt[1];
     lusbopt[0].option = LIBUSB_OPTION_LOG_LEVEL;
     lusbopt[0].value.ival = 0;
     libusb_init_context( &libusbctx, lusbopt, 1 );
+#else
+    libusb_init_context( &libusbctx );
+#endif
 
     if ( libusbctx != NULL )
     {
