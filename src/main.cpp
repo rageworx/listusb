@@ -561,6 +561,18 @@ size_t listdevs()
         {
             if ( optpar_color > 0 )
             {
+                printf( "\033[93m" );
+            }
+            printf( "BUS;" );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[97m" );
+            }
+            printf( "Port;");
+
+            if ( optpar_color > 0 )
+            {
                 printf( "\033[92m" );
             }
             printf( "[ PID: VID]; ");
@@ -599,7 +611,7 @@ size_t listdevs()
             {
                 printf( "\033[97m" );
             }
-            printf( "MRP(mAh)\n" );
+            printf( "MRP(mA)\n" );
 
             if ( optpar_color > 0 )
             {
@@ -619,14 +631,45 @@ size_t listdevs()
 
             if ( libusb_get_device_descriptor( device, &desc ) == 0 )
             {
-                if ( optpar_color > 0 )
-                {
-                    printf( "\033[94m" );
-                }
+                uint8_t dev_bus = libusb_get_bus_number( device );
+                uint8_t dev_port = libusb_get_port_number( device );
 
                 if ( optpar_simple == 0 )
                 {
-                    printf( "Device VID:PID " );
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[94m" );
+                    }
+                    printf( "Bus " );
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[93m" );
+                    }
+                    printf( "%03u, ", dev_bus );
+
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[93m" );
+                    }
+                    printf( "Port " );
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[97m" );
+                    }
+                    printf( "%03u ", dev_port );
+                }
+                else
+                {
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[93m" );
+                    }
+                    printf( "%03u;", dev_bus );
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[97m" );
+                    }
+                    printf( "%03u;", dev_port );
                 }
 
                 if ( optpar_color > 0 )
