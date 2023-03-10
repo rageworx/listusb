@@ -15,11 +15,13 @@
 static struct option long_opts[] = {
     { "help",           no_argument,        0, 'h' },
     { "simple",         no_argument,        0, 's' },
+    { "reftable",       no_argument,        0, 't' },
     { "version",        no_argument,        0, 'v' },
     { "color",          no_argument,        0, 'c' },
     { NULL, 0, 0, 0 }
 };
 
+static uint32_t        optpar_reftbl    = 0;
 static uint32_t        optpar_simple    = 0;
 static uint32_t        optpar_color     = 0;
 static libusb_context* libusbctx        = NULL;
@@ -554,6 +556,56 @@ size_t listdevs()
 
     if ( devscnt > 0 )
     {
+        if ( ( optpar_simple > 0 ) && ( optpar_reftbl > 0 ) )
+        {
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[92m" );
+            }
+            printf( "[ PID: VID]; ");
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[91m" );
+            }
+            printf( "manufacturer; ");
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[95m" );
+            }
+            printf( "product name; " );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[91m" );
+            }
+            printf( "serial No.; " );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[94m" );
+            }
+            printf( "class; " );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[93m" );
+            }
+            printf( "bcdID; " );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[97m" );
+            }
+            printf( "MRP(mAh)\n" );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[0m" );
+            }
+        }
+
         for ( size_t cnt = 0; cnt<devscnt; cnt++ )
         {
             libusb_device* device = listdev[cnt];
@@ -833,7 +885,8 @@ void showHelp()
 "\n"
 "  -v,--version        display version only and quit.\n"
 "  -s,--simple         display information as short as can.\n"
-"  -c,--color          display with xterm-color escape codes.\n";
+"  -c,--color          display with xterm-color escape codes.\n"
+"  -t,--reftable       display reference table section with --simple.\n";
 
     fprintf( stdout, "%s\n", shortusage );
 }
@@ -851,7 +904,7 @@ int main( int argc, char** argv )
     {
         int optidx = 0;
         int opt = getopt_long( argc, argv,
-                               " :hvsc",
+                               " :hvsct",
                                long_opts, &optidx );
         if ( opt >= 0 )
         {
@@ -872,6 +925,10 @@ int main( int argc, char** argv )
 
                 case 'c':
                     optpar_color = 1;
+                    break;
+
+                case 't':
+                    optpar_reftbl = 1;
                     break;
             }
         }
