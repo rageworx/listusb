@@ -203,15 +203,33 @@ void prtUSBclass( uint8_t id, uint8_t subid )
 
 const char* bcd2human( uint16_t id )
 {
-    static char retstr[16] = {0};
+    static char retstr[32] = {0};
 
     uint8_t hv = id >> 8;
     uint8_t lv = ( id & 0x00F0 ) >> 4;
 
     if ( optpar_simple == 0 )
-        snprintf( retstr, 16, "USB %u.%u", hv, lv );
+    {
+        if ( optpar_color > 0 )
+        {
+            snprintf( retstr, 32, "\033[93mUSB \033[91m%u.%u", hv, lv );
+        }
+        else
+        {
+            snprintf( retstr, 32, "USB %u.%u", hv, lv );
+        }
+    }
     else
-        snprintf( retstr, 16, "%u.%u", hv, lv );
+    {
+        if ( optpar_color > 0 )
+        {
+            snprintf( retstr, 32, "\033[91m%u.%u", hv, lv );
+        }
+        else
+        {
+            snprintf( retstr, 32, "%u.%u", hv, lv );
+        }
+    }
 
     return retstr;
 }
@@ -466,7 +484,7 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
 
                     if ( optpar_color > 0 )
                     {
-                        printf( "\033[90m" );
+                        printf( "\033[95m" );
                     }
 
                     printf( ":" );
@@ -484,17 +502,21 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
 
                             if ( ( *pE >= '0' ) && ( *pE <= '9' ) )
                             {
-                                printf( "%s", pE );
+                                printf( "%c", *pE );
                             }
                             else
                             {
-                                printf( "%X", cfg->interface[x].altsetting[y].endpoint[z].extra );
+                                printf( "0x%X", (uint8_t)*pE );
                             }
+                        }
+                        else
+                        {
+                            printf( "-" );
+                        }
 
-                            if (z+1 < cfg->interface[x].altsetting[y].bNumEndpoints )
-                            {
-                                printf( "," );
-                            }
+                        if (z+1 < cfg->interface[x].altsetting[y].bNumEndpoints )
+                        {
+                            printf( "," );
                         }
                     }
 
