@@ -39,7 +39,11 @@ ifeq ($(KRNL),Darwin)
     OPTLIBS += -framework CoreFoundation
     OPTLIBS += -framework Security
 else
-# currently no plan to support other OS.
+    ifeq ($(KRNL),Linux)
+        OPTLIBS += -ludev -lpthread
+    else
+	# currently no plan to support other OS.
+    endif
 endif
 
 # Base PATH
