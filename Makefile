@@ -39,7 +39,7 @@ ifeq ($(KRNL),Darwin)
     OPTLIBS += -framework CoreFoundation
     OPTLIBS += -framework Security
 else
-    UNSUPPORTED = 1
+# currently no plan to support other OS.
 endif
 
 # Base PATH
@@ -64,7 +64,7 @@ LIBUSB_LIB = $(LIBUSB_INC)/.libs
 # Compiler optiops 
 COPTS += -std=c++11
 COPTS += -fomit-frame-pointer -O2
-COPTS += -g3 -DDEBUG -DDEBUG
+#COPTS += -g3 -DDEBUG
 COPTS += $(OPTARCH)
 
 # CC FLAGS
@@ -83,21 +83,12 @@ SRCS = $(wildcard $(SRC_PATH)/*.cpp)
 # Make object targets from SRCS.
 OBJS = $(SRCS:$(SRC_PATH)/%.cpp=$(TARGET_OBJ)/%.o)
 
-# Target
-TARGETBIN = $(TARGET_DIR)/$(TARGET_PKG)
-
-ifeq ($(UNSUPPORTED),1)
-    SRCS =
-    OBJS = 
-    TARGETBIN=UNSUPPORTED
-endif
-
 .PHONY: prepare clean
 
 all: prepare continue
 cleanall: clean
 
-continue: $(TARGETBIN)
+continue: $(TARGET_DIR)/$(TARGET_PKG)
 
 prepare:
 	@mkdir -p $(TARGET_DIR)
@@ -114,18 +105,16 @@ $(OBJS): $(TARGET_OBJ)/%.o: $(SRC_PATH)/%.cpp
 	@echo "Building $@ ... "
 	@$(GPP) $(CFLAGS) -c $< -o $@
 
-$(TARGETBIN): $(OBJS)
+$(TARGET_DIR)/$(TARGET_PKG): $(OBJS)
 	@echo "Generating $@ ..."
 	@$(GPP) $^ $(CFLAGS) $(LFLAGS)  -o $@
 	@echo "done."
 
 install:
 	@echo "Install to $(INSTALLDIR) ... "
-	@cp -f $(TARGETBIN) $(INSTALLDIR)
+	@cp -f $(TARGET_DIR)/$(TARGET_PKG) $(INSTALLDIR)
 
 uninstall:
 	@echo "Unintalling ..."
 	@rm -f $(INSTALLDIR)/$(TARGET_PKG)
 
-UNSUPPORTED:
-	@echo "unsupported OS."

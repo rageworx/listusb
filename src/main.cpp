@@ -10,7 +10,7 @@
 #include <cerrno>
 
 #define ME_STR          "listusb"
-#define VERSION_STR     "0.1.0.5"
+#define VERSION_STR     "0.2.0.10"
 
 static struct option long_opts[] = {
     { "help",           no_argument,        0, 'h' },
@@ -26,10 +26,24 @@ static libusb_context* libusbctx        = NULL;
 
 void prtUSBclass( uint8_t id, uint8_t subid )
 {
+    if ( optpar_color > 0 )
+    {
+        printf( "\033[94m" );
+    }
+
     if ( optpar_simple == 0 )
+    {
         printf( "Class = " );
+    }
     else
+    {
         printf( "cls=" );
+    }
+
+    if ( optpar_color > 0 )
+    {
+        printf( "\033[93m" );
+    }
 
     switch( id )
     {
@@ -40,7 +54,7 @@ void prtUSBclass( uint8_t id, uint8_t subid )
             }
             else
             {
-                printf( "PER/%02X;", subid ); 
+                printf( "PER/%02X;", subid );
             }
             break;
 
@@ -178,6 +192,11 @@ void prtUSBclass( uint8_t id, uint8_t subid )
             break;
     }
 
+    if ( optpar_color > 0 )
+    {
+        printf( "\033[0m" );
+    }
+
     if ( optpar_simple == 0 )
         printf( "\n" );
 }
@@ -205,26 +224,113 @@ void prtUSBConfig( libusb_device_handle* dev, uint8_t idx, uint16_t bcd, libusb_
 
         if ( cfg->bDescriptorType == LIBUSB_DT_STRING )
         {
-            libusb_get_string_descriptor_ascii( dev, 
+            libusb_get_string_descriptor_ascii( dev,
                                                 cfg->iConfiguration,
                                                 cfgstr, 64 );
         }
 
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[93m" );
+        }
+
+        if ( optpar_simple == 0 )
+            printf( "    + ");
+
         if ( strlen( (const char*)cfgstr ) > 0 )
         {
             if ( optpar_simple == 0 )
-                printf( "    + config[%2u] : %s, ", idx, (const char*)cfgstr );
+            {
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[94m" );
+                }
+
+                printf( "config[" );
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[95m" );
+                }
+
+                printf( "%2u", idx );
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[94m" );
+                }
+
+                printf( "] " );
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[0m" );
+                }
+
+                printf( " : " );
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[93m" );
+                }
+
+                printf( "%s, ", idx, (const char*)cfgstr );
+            }
         }
         else
         if ( optpar_simple == 0 )
         {
-            printf( "    + config[%2u], ", idx );
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[94m" );
+            }
+
+            printf( "config[" );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[95m" );
+            }
+
+            printf( "%2u", idx );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[94m" );
+            }
+
+            printf( "], ");
         }
 
         if ( optpar_simple == 0 )
         {
-            printf( "interfaces = %u, ", cfg->bNumInterfaces );
-            printf( "ID = 0x%02X, ", cfg->bConfigurationValue );
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[94m" );
+            }
+
+            printf( "interfaces = " );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[93m" );
+            }
+
+            printf( "%u, ", cfg->bNumInterfaces );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[95m" );
+            }
+
+            printf( "ID = " );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[93m" );
+            }
+
+            printf( "0x%02X, ", cfg->bConfigurationValue );
         }
 
         uint32_t pwrCalc = cfg->MaxPower;
@@ -237,10 +343,30 @@ void prtUSBConfig( libusb_device_handle* dev, uint8_t idx, uint16_t bcd, libusb_
             pwrCalc *= 2;
         }
 
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[94m" );
+        }
+
         if ( optpar_simple == 0 )
-            printf( "max required power = %u mA\n", pwrCalc );
+            printf( "max required power = " );
         else
-            printf( "MRP=%u(mA)\n", pwrCalc );
+            printf( "MRP=" );
+
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[93m" );
+        }
+
+        if ( optpar_simple == 0 )
+            printf( "%u mA\n", pwrCalc );
+        else
+            printf( "%u(mA)\n", pwrCalc );
+
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[0m" );
+        }
     }
 }
 
@@ -264,15 +390,30 @@ size_t listdevs()
 
             if ( libusb_get_device_descriptor( device, &desc ) == 0 )
             {
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[94m" );
+                }
+
                 if ( optpar_simple == 0 )
                 {
-                    printf( "Device VID:PID [%04X:%04X] ", 
-                            desc.idVendor, desc.idProduct );
+                    printf( "Device VID:PID " );
+                }
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[92m" );
+                }
+
+                if ( optpar_simple == 0 )
+                {
+                    printf( "[%04X:%04X] ", desc.idVendor, desc.idProduct );
                 }
                 else
                 {
                     printf( "[%04X:%04X];", desc.idVendor, desc.idProduct );
                 }
+
                 // open device ..
                 int usberr = libusb_open( device, &dev );
                 if ( usberr == 0 )
@@ -293,6 +434,15 @@ size_t listdevs()
                                                   64 );
 
                 }
+                else
+                {
+                    dev = NULL;
+                }
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[91m" );
+                }
 
                 if ( strlen( (const char*)dev_mn ) > 0 )
                 {
@@ -309,6 +459,10 @@ size_t listdevs()
                         printf( ";" );
                 }
 
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[95m" );
+                }
 
                 if ( strlen( (const char*)dev_pn ) > 0 )
                 {
@@ -325,25 +479,56 @@ size_t listdevs()
                         printf( ";" );
                 }
 
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[93m" );
+                }
+
                 if ( optpar_simple == 0 )
                     printf( "    + " );
 
                 if ( strlen( (const char*)dev_sn ) > 0 )
                 {
                     if ( optpar_simple == 0 )
-                        printf( "Serial number = %s\n", (const char*)dev_sn );
+                    {
+                        if ( optpar_color > 0 )
+                        {
+                            printf( "\033[94m" );
+                        }
+
+                        printf( "Serial number =" );
+
+                        if ( optpar_color > 0 )
+                        {
+                            printf( "\033[93m" );
+                        }
+
+                        printf(" %s\n", (const char*)dev_sn );
+                    }
                     else
                         printf( "%s;", (const char*)dev_sn );
                 }
                 else
                 {
                     if ( optpar_simple == 0 )
+                    {
+                        if ( optpar_color > 0 )
+                        {
+                            printf( "\033[91m" );
+                        }
+
                         printf( "(SN not found)\n" );
+                    }
                     else
-                        printf( ";" ); 
+                        printf( ";" );
                 }
 
-                if ( ( desc.bDeviceClass > 0 ) 
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[93m" );
+                }
+
+                if ( ( desc.bDeviceClass > 0 )
                         || ( desc.bDeviceSubClass > 0 ) )
                 {
                     if ( optpar_simple == 0 )
@@ -354,7 +539,24 @@ size_t listdevs()
                 else
                 if ( optpar_simple == 1 )
                 {
-                    printf( "cls=none;" );
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[94m" );
+                    }
+
+                    printf( "cls=" );
+
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[93m" );
+                    }
+
+                    printf( "none;" );
+                }
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[93m" );
                 }
 
                 if ( optpar_simple == 0 )
@@ -363,13 +565,65 @@ size_t listdevs()
                 uint16_t l16bcdID = libusb_cpu_to_le16( desc.bcdUSB );
                 if ( optpar_simple == 0 )
                 {
-                    printf( "bcdID = %04X, human readable = %s", l16bcdID,
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[94m" );
+                    }
+
+                    printf( "bcdID = " );
+
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[93m" );
+                    }
+
+                    printf( "%04X,", l16bcdID );
+
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[94m" );
+                    }
+
+                    printf( " human readable = " );
+
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[93m" );
+                    }
+
+                    printf( "%s",
                             bcd2human( l16bcdID ) );
                     printf( "\n" );
                 }
                 else
                 {
-                    printf( "bcdID=%04X(%s);", l16bcdID, bcd2human( l16bcdID ) );
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[94m" );
+                    }
+
+                    printf( "bcdID=" );
+
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[93m" );
+                    }
+
+                    printf( "%04X(", l16bcdID );
+
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[97m" );
+                    }
+
+                    printf( "%s", bcd2human( l16bcdID ) );
+
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[93m" );
+                    }
+
+                    printf( ");" );
                 }
 
                 // get config
@@ -377,7 +631,7 @@ size_t listdevs()
                 {
                     for ( uint8_t cnt=0; cnt<desc.bNumConfigurations; cnt++ )
                     {
-                        usberr = libusb_get_config_descriptor( device, 
+                        usberr = libusb_get_config_descriptor( device,
                                                                cnt,
                                                                &cfg );
                         if ( usberr == 0 )
@@ -405,12 +659,12 @@ void showHelp()
 "  -s,--simple         display information as short as can.\n"
 "  -c,--color          display with xterm-color escape codes.\n";
 
-    fprintf( stdout, "%s\n", shortusage );    
+    fprintf( stdout, "%s\n", shortusage );
 }
 
 void showVersion()
 {
-    printf( "%s version %s, libusb version %d.%d.%d\n", 
+    printf( "%s version %s, libusb version %d.%d.%d\n",
             ME_STR, VERSION_STR, LIBUSB_MAJOR, LIBUSB_MINOR, LIBUSB_MICRO );
 }
 
@@ -420,8 +674,8 @@ int main( int argc, char** argv )
     for(;;)
     {
         int optidx = 0;
-        int opt = getopt_long( argc, argv, 
-                               " :hvs",
+        int opt = getopt_long( argc, argv,
+                               " :hvsc",
                                long_opts, &optidx );
         if ( opt >= 0 )
         {
@@ -449,18 +703,93 @@ int main( int argc, char** argv )
             break;
     } /// of for( == )
 
-    if ( optpar_simple == 0 ) \
-    printf( "%s, version %s, (C)Copyrighted 2023 Raphael Kim, w/ libusb %d.%d.%d\n", 
-            ME_STR, VERSION_STR, LIBUSB_MAJOR, LIBUSB_MINOR, LIBUSB_MICRO );
+    if ( optpar_simple == 0 )
+    {
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[93m" );
+        }
+        printf( "%s", ME_STR );
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[0m" );
+        }
+        printf( ", " );
 
-    libusb_init( &libusbctx );
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[96m" );
+        }
+        printf( "version %s", VERSION_STR );
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[0m" );
+        }
+        printf( ", " );
+
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[94m" );
+        }
+        printf( "(C)Copyrighted 2023 Raphael Kim" );
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[0m" );
+        }
+        printf( ", " );
+
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[93m" );
+        }
+        printf( "w/ libusb v%d.%d.%d", LIBUSB_MAJOR, LIBUSB_MINOR, LIBUSB_MICRO );
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[0m" );
+        }
+        printf( "\n" );
+    }
+
+    libusb_init_option lusbopt[1];
+    lusbopt[0].option = LIBUSB_OPTION_LOG_LEVEL;
+    lusbopt[0].value.ival = 0;
+    libusb_init_context( &libusbctx, lusbopt, 1 );
 
     if ( libusbctx != NULL )
     {
         size_t devs = listdevs();
 
         if ( ( devs > 0 ) && ( optpar_simple == 0 ) )
-            printf( "total %zu devices found.\n", devs );
+        {
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[96m" );
+            }
+
+            printf( "total " );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[93m" );
+            }
+
+            printf( "%zu", devs );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[96m" );
+            }
+
+            if ( devs == 1 )
+                printf( " device found.\n" );
+            else
+                printf( " devices found.\n" );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[0m" );
+            }
+        }
 
         fflush( stdout );
 
