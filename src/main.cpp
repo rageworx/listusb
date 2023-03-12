@@ -27,6 +27,7 @@ static uint32_t        optpar_reftbl    = 0;
 static uint32_t        optpar_simple    = 0;
 static uint32_t        optpar_color     = 0;
 static uint32_t        optpar_lessinfo  = 0;
+static uint32_t        optpar_treeview  = 0; /// is it poosible ?
 static libusb_context* libusbctx        = NULL;
 
 void prtUSBclass( uint8_t id, uint8_t subid )

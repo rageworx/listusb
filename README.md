@@ -1,14 +1,18 @@
 # listusb
+
 A tool that detailed listing USB device for macOS, Linux, MSYS2 shells and consoles.
 
 ## What is listusb
+
 * macOS don't have tool to what USB device connected in shell.
 * There's lsusb in brew usbtools, but not functional to check detailed USB information.
 * listusb helps what USB device connected, and help to correctly identified to my macOS as real device supported speed - specially NVMe SSD devices easily not recognized to USB2 rather than USB3 !
 * And better view for POSIX `lsusb`.
 
 ## Easy to read
+
 * Build source, and install to user space, then type `listusb`.
+
 ```
 >  listusb
 listusb, version 0.2.0.10, (C)Copyrighted 2023 Raphael Kim, w/ libusb v1.0.26
@@ -80,16 +84,20 @@ Bus 002, Port 009 [04B4:0101] (no manufacturer)Cypress USB Keyboard / PS2 Mouse
         - interface[0] : alt.settings = 1 -> (ep[0]=1:-)
         - interface[1] : alt.settings = 1 -> (ep[0]=1:-)
 ```
+
 * There's more xterm escape coloring option for `-c` or `--color`.
 * Also simple view with `-s` or `--simple`.
 
 ## Manual configuration
-* edit `.config` file to where is libusb-1.0.26
+
+* edit `.config` file to where is libusb-1.0.26, or latest
 
 ## Reuired external library,
+
 ### libusb-1.0.26 ( for macOS )
-* Clone [libusb tag v1.0.26](https://github.com/libusb/libusb/tree/v1.0.26) to your sources managing directory,
+
+* Clone [libusb tag v1.0.26](https://github.com/libusb/libusb/tree/v1.0.26) or [lisbusb latest](https://github.com/libusb/libusb) to your sources managing directory,
 * Need to modify libusb-1.0.26 Makefile to including this options for
-    - `-arch x86_64 -arch arm64 -mmacosx-version-min=11.0` to
-	- each CFLAGS and CXXFLAGS on libusb-1.0.26/libusb/Makefile
+  - `-arch x86_64 -arch arm64 -mmacosx-version-min=11.0` to
+  - each CFLAGS and CXXFLAGS on libusb-1.0.26/libusb/Makefile
 * And build
