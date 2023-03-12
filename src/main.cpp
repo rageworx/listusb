@@ -11,20 +11,22 @@
 #include <cerrno>
 
 #define ME_STR          "listusb"
-#define VERSION_STR     "0.2.0.10"
+#define VERSION_STR     "0.2.1.12"
 
 static struct option long_opts[] = {
     { "help",           no_argument,        0, 'h' },
     { "simple",         no_argument,        0, 's' },
-    { "reftable",       no_argument,        0, 't' },
+    { "reftable",       no_argument,        0, 'r' },
     { "version",        no_argument,        0, 'v' },
     { "color",          no_argument,        0, 'c' },
+    { "lessinfo",       no_argument,        0, 'L' },
     { NULL, 0, 0, 0 }
 };
 
 static uint32_t        optpar_reftbl    = 0;
 static uint32_t        optpar_simple    = 0;
 static uint32_t        optpar_color     = 0;
+static uint32_t        optpar_lessinfo  = 0;
 static libusb_context* libusbctx        = NULL;
 
 void prtUSBclass( uint8_t id, uint8_t subid )
@@ -390,162 +392,165 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
         }
 
         // testing interfaces ...
-        if ( ( cfg->bNumInterfaces > 0 ) && ( optpar_simple == 0 ) )
+        if ( optpar_lessinfo == 0 )
         {
-            for ( int x=0; x<cfg->bNumInterfaces; x++ )
+            if ( ( cfg->bNumInterfaces > 0 ) && ( optpar_simple == 0 ) )
             {
-                if ( optpar_color > 0 )
-                {
-                    printf( "\033[97m" );
-                }
-
-                printf( "        - interface[" );
-
-                if ( optpar_color > 0 )
-                {
-                    printf( "\033[96m" );
-                }
-
-                printf( "%d",x );
-
-                if ( optpar_color > 0 )
-                {
-                    printf( "\033[97m" );
-                }
-
-                printf( "] : " );
-
-                if ( cfg->extra_length > 0 )
-                {
-                    printf( "%s, ", (const char*)cfg->extra );
-                }
-
-                if ( optpar_color > 0 )
-                {
-                    printf( "\033[96m" );
-                }
-
-                printf( "alt.settings = " );
-
-                if ( optpar_color > 0 )
-                {
-                    printf( "\033[93m" );
-                }
-
-                printf( "%d",cfg->interface[x].num_altsetting );
-
-                if ( optpar_color > 0 )
-                {
-                    printf( "\033[97m" );
-                }
-
-                printf( " -> " );
-
-                if ( optpar_color > 0 )
-                {
-                    printf( "\033[96m" );
-                }
-
-                printf( "(" );
-
-                for( int y=0; y<cfg->interface[x].num_altsetting; y++ )
+                for ( int x=0; x<cfg->bNumInterfaces; x++ )
                 {
                     if ( optpar_color > 0 )
                     {
-                        printf( "\033[96m" );
+                        printf( "\033[97m" );
                     }
 
-                    printf( "ep[" );
-
-                    if ( optpar_color > 0 )
-                    {
-                        printf( "\033[95m" );
-                    }
-
-                    printf( "%d", y );
+                    printf( "        - interface[" );
 
                     if ( optpar_color > 0 )
                     {
                         printf( "\033[96m" );
                     }
 
-                    printf( "]" );
+                    printf( "%d",x );
 
                     if ( optpar_color > 0 )
                     {
-                        printf( "\033[91m" );
+                        printf( "\033[97m" );
                     }
 
-                    printf( "=" );
+                    printf( "] : " );
+
+                    if ( cfg->extra_length > 0 )
+                    {
+                        printf( "%s, ", (const char*)cfg->extra );
+                    }
 
                     if ( optpar_color > 0 )
                     {
-                        printf( "\033[92m" );
+                        printf( "\033[96m" );
                     }
 
-                    printf( "%d", cfg->interface[x].altsetting[y].bNumEndpoints );
+                    printf( "alt.settings = " );
 
                     if ( optpar_color > 0 )
                     {
-                        printf( "\033[95m" );
+                        printf( "\033[93m" );
                     }
 
-                    printf( ":" );
+                    printf( "%d",cfg->interface[x].num_altsetting );
 
                     if ( optpar_color > 0 )
                     {
-                        printf( "\033[32m" );
+                        printf( "\033[97m" );
                     }
 
-                    for ( int z=0; z<cfg->interface[x].altsetting[y].bNumEndpoints; z++ )
+                    printf( " -> " );
+
+                    if ( optpar_color > 0 )
                     {
-                        if ( cfg->interface[x].altsetting[y].endpoint[z].extra_length > 0 )
+                        printf( "\033[96m" );
+                    }
+
+                    printf( "(" );
+
+                    for( int y=0; y<cfg->interface[x].num_altsetting; y++ )
+                    {
+                        if ( optpar_color > 0 )
                         {
-                            const char* pE = (const char*)cfg->interface[x].altsetting[y].endpoint[z].extra;
+                            printf( "\033[96m" );
+                        }
 
-                            if ( ( *pE >= '0' ) && ( *pE <= '9' ) )
+                        printf( "ep[" );
+
+                        if ( optpar_color > 0 )
+                        {
+                            printf( "\033[95m" );
+                        }
+
+                        printf( "%d", y );
+
+                        if ( optpar_color > 0 )
+                        {
+                            printf( "\033[96m" );
+                        }
+
+                        printf( "]" );
+
+                        if ( optpar_color > 0 )
+                        {
+                            printf( "\033[91m" );
+                        }
+
+                        printf( "=" );
+
+                        if ( optpar_color > 0 )
+                        {
+                            printf( "\033[92m" );
+                        }
+
+                        printf( "%d", cfg->interface[x].altsetting[y].bNumEndpoints );
+
+                        if ( optpar_color > 0 )
+                        {
+                            printf( "\033[95m" );
+                        }
+
+                        printf( ":" );
+
+                        if ( optpar_color > 0 )
+                        {
+                            printf( "\033[32m" );
+                        }
+
+                        for ( int z=0; z<cfg->interface[x].altsetting[y].bNumEndpoints; z++ )
+                        {
+                            if ( cfg->interface[x].altsetting[y].endpoint[z].extra_length > 0 )
                             {
-                                printf( "%c", *pE );
+                                const char* pE = (const char*)cfg->interface[x].altsetting[y].endpoint[z].extra;
+
+                                if ( ( *pE >= '0' ) && ( *pE <= '9' ) )
+                                {
+                                    printf( "%c", *pE );
+                                }
+                                else
+                                {
+                                    printf( "0x%X", (uint8_t)*pE );
+                                }
                             }
                             else
                             {
-                                printf( "0x%X", (uint8_t)*pE );
+                                printf( "-" );
+                            }
+
+                            if (z+1 < cfg->interface[x].altsetting[y].bNumEndpoints )
+                            {
+                                printf( "," );
                             }
                         }
-                        else
-                        {
-                            printf( "-" );
-                        }
 
-                        if (z+1 < cfg->interface[x].altsetting[y].bNumEndpoints )
+                        if( y+1 < cfg->interface[x].num_altsetting )
                         {
+                            if ( optpar_color > 0 )
+                            {
+                                printf( "\033[0m" );
+                            }
                             printf( "," );
                         }
                     }
 
-                    if( y+1 < cfg->interface[x].num_altsetting )
+                    if ( optpar_color > 0 )
                     {
-                        if ( optpar_color > 0 )
-                        {
-                            printf( "\033[0m" );
-                        }
-                        printf( "," );
+                        printf( "\033[96m" );
+                    }
+
+                    printf( ")\n" );
+
+                    if ( optpar_color > 0 )
+                    {
+                        printf( "\033[0m" );
                     }
                 }
-
-                if ( optpar_color > 0 )
-                {
-                    printf( "\033[96m" );
-                }
-
-                printf( ")\n" );
-
-                if ( optpar_color > 0 )
-                {
-                    printf( "\033[0m" );
-                }
-            }
-        } /// of if ( ( cfg->bNumInterfaces > 0 ) && ( optpar_simple == 0 ) )
+            } /// of if ( ( cfg->bNumInterfaces > 0 ) && ( optpar_simple == 0 ) )
+        } /// of if ( optpar_lessinfo == 0 )
     }
 }
 
@@ -910,6 +915,10 @@ size_t listdevs()
                         {
                             prtUSBConfig( device, dev, cnt, l16bcdID, cfg );
                         }
+                        else
+                        {
+                            printf( "\n" );
+                        }
                     }
                 }
 
@@ -925,12 +934,14 @@ size_t listdevs()
 void showHelp()
 {
     const char shortusage[] = \
-"Usage: listusb [-v] [-s]\n"
+"Usage: listusb [-v] [-s] ... \n"
 "\n"
 "  -v,--version        display version only and quit.\n"
 "  -s,--simple         display information as short as can.\n"
 "  -c,--color          display with xterm-color escape codes.\n"
-"  -t,--reftable       display reference table section with --simple.\n";
+"  -r,--reftable       display reference table section with --simple.\n"
+"  -L,--lessinfo       display information lesser than normal case.\n"
+"  -t,--tree           display USB device tree ( not implemented )\n";
 
     fprintf( stdout, "%s\n", shortusage );
 }
@@ -948,7 +959,7 @@ int main( int argc, char** argv )
     {
         int optidx = 0;
         int opt = getopt_long( argc, argv,
-                               " :hvsct",
+                               " :hvsctrL",
                                long_opts, &optidx );
         if ( opt >= 0 )
         {
@@ -972,7 +983,13 @@ int main( int argc, char** argv )
                     break;
 
                 case 't':
+                    printf( "*NOTICE*\n't' is reserved to option for '--tree', please use 'r' instead 't'.\n");
+                case 'r':
                     optpar_reftbl = 1;
+                    break;
+
+                case 'L':
+                    optpar_lessinfo = 1;
                     break;
             }
         }
@@ -1065,6 +1082,21 @@ int main( int argc, char** argv )
                 printf( " device found.\n" );
             else
                 printf( " devices found.\n" );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[0m" );
+            }
+        }
+        else
+        if ( ( devs == 0 ) && ( optpar_lessinfo == 0 ) )
+        {
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[91m" );
+            }
+
+            printf( "no device found.\n" );
 
             if ( optpar_color > 0 )
             {

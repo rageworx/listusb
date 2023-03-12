@@ -39,6 +39,7 @@ ifeq ($(KRNL),Darwin)
     OPTLIBS += -framework CoreFoundation
     OPTLIBS += -framework Security
 else
+    CFLAGS += -s
     ifeq ($(KRNL),Linux)
         OPTLIBS += -ludev -lpthread
     else
