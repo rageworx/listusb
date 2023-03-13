@@ -68,6 +68,24 @@ static usbdevtree       usbtree;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void trimStrInner( char *str )
+{
+    char*  spt = str;
+    size_t len = strlen(str);
+    size_t lsz = len;
+
+    if ( len > 0 )
+    {
+        while( isspace(str[len - 1]) ) --len;
+        while( *str && isspace(*str) ) ++str, --len;
+
+        char* tmps = strdup( str );
+        memset( spt, 0, lsz );
+        memcpy( spt, tmps, len );
+        free( tmps );
+    }
+}
+
 void alloc_append_portdev( usbdevtree* udt, size_t bi, size_t l )
 {
     if ( ( udt != NULL ) && ( l > 0 ) && ( bi < udt->size() ) )
@@ -899,6 +917,10 @@ size_t listdevs()
                                                   desc.iSerialNumber,
                                                   dev_sn,
                                                   SLEN_SN );
+
+                    trimStrInner( (char*)dev_pn );
+                    trimStrInner( (char*)dev_mn );
+                    trimStrInner( (char*)dev_sn );
                 }
                 else
                 {
@@ -1207,15 +1229,27 @@ size_t treelistdevs()
                     {
                         snprintf( curDevInfo->product, SLEN_PRODUCT, "-" );
                     }
+                    else
+                    {
+                        trimStrInner( curDevInfo->product );
+                    }
 
                     if ( strlen( curDevInfo->manufacturer ) == 0 )
                     {
                         snprintf( curDevInfo->manufacturer, SLEN_MANUFACTURER, "-" );
                     }
+                    else
+                    {
+                        trimStrInner( curDevInfo->manufacturer );
+                    }
 
                     if ( strlen( curDevInfo->serialnumber ) == 0 )
                     {
                         snprintf( curDevInfo->serialnumber, SLEN_SN, "-" );
+                    }
+                    else
+                    {
+                        trimStrInner( curDevInfo->serialnumber );
                     }
                 }
                 else
@@ -1328,7 +1362,7 @@ size_t treelistdevs()
 void showHelp()
 {
     const char shortusage[] = \
-"Usage: listusb [-v] [-s] ... \n"
+"Usage: %s [-v] [-s] ... \n"
 "\n"
 "  -v,--version        display version only and quit.\n"
 "  -s,--simple         display information as short as can.\n"
@@ -1337,7 +1371,7 @@ void showHelp()
 "  -L,--lessinfo       display information lesser than normal case.\n"
 "  -t,--tree           display USB device tree ( not implemented )\n";
 
-    fprintf( stdout, "%s\n", shortusage );
+    fprintf( stdout, shortusage, ME_STR );
 }
 
 void showVersion()
@@ -1348,9 +1382,19 @@ void showVersion()
 
 int main( int argc, char** argv )
 {
+#ifdef __linux__
+    int s_euid = geteuid();
+    if ( s_euid > 10 )
+    {
+        fprintf( stderr, "WARNING: some linux not able to read correct USB information as normal user." );
+        fprintf( stderr, " Use `sudo` to run %s to correct information if some informations are displayed as empty.",
+                 ME_STR );
+    }
+#endif /// of __linux__
+
 #ifdef DEBUG_LIBUSB
     putenv( "LIBUSB_DEBUG=4" );
-#endif
+#endif /// of DEBUG_LIBUSB
 
     // getopt
     for(;;)
