@@ -39,7 +39,7 @@ ifeq ($(KRNL),Darwin)
     OPTLIBS += -framework CoreFoundation
     OPTLIBS += -framework Security
 else
-    CFLAGS += -s
+#    CFLAGS += -s
     ifeq ($(KRNL),Linux)
         OPTLIBS += -ludev -lpthread
     else
@@ -68,8 +68,8 @@ LIBUSB_LIB = $(LIBUSB_INC)/.libs
 
 # Compiler optiops 
 COPTS += -std=c++11
-COPTS += -fomit-frame-pointer -O2
-#COPTS += -g3 -DDEBUG
+#COPTS += -fomit-frame-pointer -O2
+COPTS += -g3 -DDEBUG
 COPTS += $(OPTARCH)
 
 # CC FLAGS

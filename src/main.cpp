@@ -9,9 +9,44 @@
 #include <cstring>
 #include <cstdint>
 #include <cerrno>
+#include <vector>
 
-#define ME_STR          "listusb"
-#define VERSION_STR     "0.2.1.12"
+////////////////////////////////////////////////////////////////////////////////
+
+using namespace std;
+
+////////////////////////////////////////////////////////////////////////////////
+
+#define ME_STR              "listusb"
+#define VERSION_STR         "0.2.2.17"
+
+#define SLEN_MANUFACTURER   128
+#define SLEN_PRODUCT        128
+#define SLEN_SN             64
+#define SLEN_CLASS          64
+
+////////////////////////////////////////////////////////////////////////////////
+
+typedef struct _usbdevinfo {
+    uint8_t     port;
+    uint16_t    vid;
+    uint16_t    pid;
+    uint16_t    bcd;
+    uint16_t    clsID[2];
+    char        manufacturer[SLEN_MANUFACTURER];
+    char        product[SLEN_PRODUCT];
+    char        serialnumber[SLEN_SN];
+    char        classname[SLEN_CLASS];
+}usbdevdevinfo;
+
+typedef struct _usbdevbusinfo {
+    uint8_t                     bus;
+    vector< usbdevdevinfo* >    device;
+}usbdevbusinfo;
+
+typedef vector< usbdevbusinfo* >  usbdevtree;
+
+////////////////////////////////////////////////////////////////////////////////
 
 static struct option long_opts[] = {
     { "help",           no_argument,        0, 'h' },
@@ -23,12 +58,74 @@ static struct option long_opts[] = {
     { NULL, 0, 0, 0 }
 };
 
-static uint32_t        optpar_reftbl    = 0;
-static uint32_t        optpar_simple    = 0;
-static uint32_t        optpar_color     = 0;
-static uint32_t        optpar_lessinfo  = 0;
-static uint32_t        optpar_treeview  = 0; /// is it poosible ?
-static libusb_context* libusbctx        = NULL;
+static uint32_t         optpar_reftbl       = 0;
+static uint32_t         optpar_simple       = 0;
+static uint32_t         optpar_color        = 0;
+static uint32_t         optpar_lessinfo     = 0;
+static uint32_t         optpar_treeview     = 0;
+static libusb_context*  libusbctx           = NULL;
+static usbdevtree       usbtree;
+
+////////////////////////////////////////////////////////////////////////////////
+
+void alloc_append_portdev( usbdevtree* udt, size_t bi, size_t l )
+{
+    if ( ( udt != NULL ) && ( l > 0 ) && ( bi < udt->size() ) )
+    {
+        for( size_t cnt=0; cnt<l; cnt++ )
+        {
+            usbdevdevinfo* ni = new usbdevdevinfo;
+            if ( ni != NULL )
+            {
+                memset( ni, 0, sizeof( usbdevdevinfo ) );
+                udt->at(bi)->device.push_back( ni );
+            }
+        }
+    }
+}
+
+void alloc_append_businfo( usbdevtree* udt = NULL, size_t l = 0 )
+{
+    if ( ( udt != NULL ) && ( l > 0 ) )
+    {
+        for( size_t cnt=0; cnt<l; cnt++ )
+        {
+            usbdevbusinfo* ni = new usbdevbusinfo;
+            if ( ni != NULL )
+            {
+                memset( ni, 0, sizeof( usbdevbusinfo ) );
+                udt->push_back( ni );
+            }
+        }
+    }
+}
+
+void free_portdev( usbdevtree& udt )
+{
+    if ( udt.size() > 0 )
+    {
+        for( size_t cnt=0; cnt<udt.size(); cnt++ )
+        {
+            if ( udt[cnt]->device.size() > 0 )
+            {
+                for( size_t itr=0; itr< udt[cnt]->device.size(); itr++ )
+                {
+                    usbdevdevinfo* prm = udt[cnt]->device[itr];
+                    delete prm;
+                    udt[cnt]->device[itr] = NULL;
+                }
+
+                udt[cnt]->device.clear();
+            }
+
+            usbdevbusinfo* prm = udt[cnt];
+            delete prm;
+            udt[cnt] = NULL;
+        }
+    }
+
+    udt.clear();
+}
 
 void prtUSBclass( uint8_t id, uint8_t subid )
 {
@@ -205,6 +302,98 @@ void prtUSBclass( uint8_t id, uint8_t subid )
 
     if ( optpar_simple == 0 )
         printf( "\n" );
+}
+
+void putUSBClass( usbdevdevinfo* pudi = NULL, uint8_t id = 0, uint8_t subid = 0 )
+{
+    if ( pudi != NULL )
+    {
+        pudi->clsID[0] = id;
+        pudi->clsID[1] = subid;
+
+        switch( id )
+        {
+            case LIBUSB_CLASS_PER_INTERFACE:
+                snprintf( pudi->classname, SLEN_CLASS, "PER" );
+                break;
+
+            case LIBUSB_CLASS_AUDIO:
+                snprintf( pudi->classname, SLEN_CLASS, "AUD." );
+                break;
+
+            case LIBUSB_CLASS_COMM:
+                snprintf( pudi->classname, SLEN_CLASS, "COM." );
+                break;
+
+            case LIBUSB_CLASS_HID:
+                snprintf( pudi->classname, SLEN_CLASS, "HID" );
+                break;
+
+            case LIBUSB_CLASS_PHYSICAL:
+                snprintf( pudi->classname, SLEN_CLASS, "PHY." );
+                break;
+
+            case LIBUSB_CLASS_IMAGE:
+                snprintf( pudi->classname, SLEN_CLASS, "IMG." );
+                break;
+
+            case LIBUSB_CLASS_PRINTER:
+                snprintf( pudi->classname, SLEN_CLASS, "PRT." );
+                break;
+
+            case LIBUSB_CLASS_MASS_STORAGE:
+                snprintf( pudi->classname, SLEN_CLASS, "MSD." );
+                break;
+
+            case LIBUSB_CLASS_HUB:
+                snprintf( pudi->classname, SLEN_CLASS, "HUB" );
+                break;
+
+            case LIBUSB_CLASS_DATA:
+                snprintf( pudi->classname, SLEN_CLASS, "DAT." );
+                break;
+
+            case LIBUSB_CLASS_SMART_CARD:
+                snprintf( pudi->classname, SLEN_CLASS, "SCD." );
+                break;
+
+            case LIBUSB_CLASS_CONTENT_SECURITY:
+                snprintf( pudi->classname, SLEN_CLASS, "CSD." );
+                break;
+
+            case LIBUSB_CLASS_VIDEO:
+                snprintf( pudi->classname, SLEN_CLASS, "VID." );
+                break;
+
+            case LIBUSB_CLASS_PERSONAL_HEALTHCARE:
+                snprintf( pudi->classname, SLEN_CLASS, "PHD." );
+                break;
+
+            case LIBUSB_CLASS_DIAGNOSTIC_DEVICE:
+                snprintf( pudi->classname, SLEN_CLASS, "DIA." );
+                break;
+
+            case LIBUSB_CLASS_WIRELESS:
+                snprintf( pudi->classname, SLEN_CLASS, "WLS." );
+                break;
+
+            case LIBUSB_CLASS_MISCELLANEOUS:
+                snprintf( pudi->classname, SLEN_CLASS, "MISC." );
+                break;
+
+            case LIBUSB_CLASS_APPLICATION:
+                snprintf( pudi->classname, SLEN_CLASS, "APP." );
+                break;
+
+            case LIBUSB_CLASS_VENDOR_SPEC:
+                snprintf( pudi->classname, SLEN_CLASS, "VSC" );
+                break;
+
+            default:
+                snprintf( pudi->classname, SLEN_CLASS, "%04X", id );
+                break;
+        }
+    }
 }
 
 const char* bcd2human( uint16_t id )
@@ -631,9 +820,9 @@ size_t listdevs()
             libusb_device_descriptor desc = {0};
             libusb_config_descriptor* cfg;
 
-            uint8_t dev_pn[128] = {0};
-            uint8_t dev_mn[128] = {0};
-            uint8_t dev_sn[64] = {0};
+            uint8_t dev_pn[SLEN_PRODUCT] = {0};
+            uint8_t dev_mn[SLEN_MANUFACTURER] = {0};
+            uint8_t dev_sn[SLEN_SN] = {0};
 
             if ( libusb_get_device_descriptor( device, &desc ) == 0 )
             {
@@ -699,18 +888,17 @@ size_t listdevs()
                     libusb_get_string_descriptor_ascii( dev,
                                                         desc.iProduct,
                                                         dev_pn,
-                                                        128 );
+                                                        SLEN_PRODUCT );
 
                     libusb_get_string_descriptor_ascii( dev,
                                                   desc.iManufacturer,
                                                   dev_mn,
-                                                  128 );
+                                                  SLEN_MANUFACTURER );
 
                     libusb_get_string_descriptor_ascii( dev,
                                                   desc.iSerialNumber,
                                                   dev_sn,
-                                                  64 );
-
+                                                  SLEN_SN );
                 }
                 else
                 {
@@ -932,6 +1120,211 @@ size_t listdevs()
     return devscnt;
 }
 
+size_t treelistdevs()
+{
+    libusb_device_handle* dev = NULL;
+    libusb_device** listdev = NULL;
+    size_t devscnt = libusb_get_device_list( libusbctx, &listdev );
+
+    if ( devscnt > 0 )
+    {
+        for ( size_t cnt = 0; cnt<devscnt; cnt++ )
+        {
+            libusb_device* device = listdev[cnt];
+            libusb_device_descriptor desc = {0};
+            libusb_config_descriptor* cfg;
+            usbdevdevinfo* curDevInfo = NULL;
+
+            if ( libusb_get_device_descriptor( device, &desc ) == 0 )
+            {
+                uint8_t dev_bus = libusb_get_bus_number( device );
+                uint8_t dev_port = libusb_get_port_number( device );
+
+                if ( usbtree.size() == 0 )
+                {
+                    // first one
+                    alloc_append_businfo( &usbtree, 1 );
+                    usbtree[0]->bus = dev_bus;
+                    alloc_append_portdev( &usbtree, 0, 1 );
+                    curDevInfo = usbtree[0]->device[0];
+                }
+                else /// find same bus or not.
+                {
+                    bool foundBUS = false;
+                    for ( size_t itr=0; itr<usbtree.size(); itr++ )
+                    {
+                        if ( usbtree[itr]->bus == dev_bus )
+                        {
+                            foundBUS = true;
+                            alloc_append_portdev( &usbtree, itr, 1 );
+                            size_t cq = usbtree[itr]->device.size();
+                            if ( cq > 0 )
+                                cq--;
+                            curDevInfo = usbtree[itr]->device[cq];
+                            break;
+                        }
+                    }
+
+                    if ( foundBUS == false )
+                    {
+                        alloc_append_businfo( &usbtree, 1 );
+                        alloc_append_portdev( &usbtree, usbtree.size()-1, 1 );
+                        size_t cq = usbtree.size();
+                        if ( cq > 0 )
+                            cq--;
+                        usbtree[cq]->bus = dev_bus;
+                        curDevInfo = usbtree[usbtree.size()-1]->device[0];
+                    }
+                }
+
+                if ( curDevInfo != NULL )
+                {
+                    curDevInfo->port = dev_port;
+                    curDevInfo->vid  = desc.idVendor;
+                    curDevInfo->pid  = desc.idProduct;
+                }
+
+                // open device ..
+                int usberr = libusb_open( device, &dev );
+                if ( usberr == 0 )
+                {
+                    libusb_get_string_descriptor_ascii( dev,
+                                                        desc.iProduct,
+                                                        (uint8_t*)curDevInfo->product,
+                                                        SLEN_PRODUCT );
+
+                    libusb_get_string_descriptor_ascii( dev,
+                                                       desc.iManufacturer,
+                                                       (uint8_t*)curDevInfo->manufacturer,
+                                                       SLEN_MANUFACTURER );
+
+                    libusb_get_string_descriptor_ascii( dev,
+                                                        desc.iSerialNumber,
+                                                        (uint8_t*)curDevInfo->serialnumber,
+                                                        SLEN_SN );
+
+                    if ( strlen( curDevInfo->product ) == 0 )
+                    {
+                        snprintf( curDevInfo->product, SLEN_PRODUCT, "-" );
+                    }
+
+                    if ( strlen( curDevInfo->manufacturer ) == 0 )
+                    {
+                        snprintf( curDevInfo->manufacturer, SLEN_MANUFACTURER, "-" );
+                    }
+
+                    if ( strlen( curDevInfo->serialnumber ) == 0 )
+                    {
+                        snprintf( curDevInfo->serialnumber, SLEN_SN, "-" );
+                    }
+                }
+                else
+                {
+                    dev = NULL;
+                }
+
+                putUSBClass( curDevInfo, desc.bDeviceClass, desc.bDeviceSubClass );
+                curDevInfo->bcd = libusb_cpu_to_le16( desc.bcdUSB );
+
+                if ( dev != NULL )
+                    libusb_close( dev );
+            }
+        }
+
+        for( size_t cnt=0; cnt<usbtree.size(); cnt++ )
+        {
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[94m" );
+            }
+            printf( "Bus " );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[93m" );
+            }
+            printf( "%03u", usbtree[cnt]->bus );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[95m" );
+            }
+            printf( " : " );
+
+            if ( optpar_color > 0 )
+            {
+                printf( "\033[92m" );
+            }
+            printf( "%zu devices\n", usbtree[cnt]->bus, usbtree[cnt]->device.size() );
+
+            for( size_t itr=0; itr<usbtree[cnt]->device.size(); itr++ )
+            {
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[93m" );
+                }
+                printf( "  +-- " );
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[94m" );
+                }
+                printf( "Port " );
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[97m" );
+                }
+                printf( "%03u ", usbtree[cnt]->device[itr]->port );
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[92m" );
+                }
+                printf( "[%04X:%04X] ", usbtree[cnt]->device[itr]->vid,
+                                        usbtree[cnt]->device[itr]->pid );
+
+                // no need to decide color ...
+                printf( "%s, ", bcd2human( usbtree[cnt]->device[itr]->bcd ) );
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[93m" );
+                }
+                printf( "%s, ", usbtree[cnt]->device[itr]->classname );
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[96m" );
+                }
+                printf( "%s, ", usbtree[cnt]->device[itr]->serialnumber );
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[91m" );
+                }
+                printf( "%s, ", usbtree[cnt]->device[itr]->manufacturer );
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[95m" );
+                }
+                printf( "%s", usbtree[cnt]->device[itr]->product );
+
+                if ( optpar_color > 0 )
+                {
+                    printf( "\033[0m" );
+                }
+                printf( "\n" );
+            }
+        }
+
+        free_portdev( usbtree );
+    }
+
+    return devscnt;
+}
+
 void showHelp()
 {
     const char shortusage[] = \
@@ -984,7 +1377,9 @@ int main( int argc, char** argv )
                     break;
 
                 case 't':
-                    printf( "*NOTICE*\n't' is reserved to option for '--tree', please use 'r' instead 't'.\n");
+                    optpar_treeview = 1;
+                    break;
+
                 case 'r':
                     optpar_reftbl = 1;
                     break;
@@ -1056,7 +1451,16 @@ int main( int argc, char** argv )
 
     if ( libusbctx != NULL )
     {
-        size_t devs = listdevs();
+        size_t devs = 0;
+
+        if ( optpar_treeview == 0 )
+        {
+            devs = listdevs();
+        }
+        else
+        {
+            devs = treelistdevs();
+        }
 
         if ( ( devs > 0 ) && ( optpar_simple == 0 ) )
         {
