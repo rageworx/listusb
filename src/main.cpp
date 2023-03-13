@@ -1388,7 +1388,7 @@ int main( int argc, char** argv )
     if ( s_euid > 10 )
     {
         fprintf( stderr, "WARNING: some linux not able to read correct USB information as normal user." );
-        fprintf( stderr, " Use `sudo` to run %s to correct information if some informations are displayed as empty.",
+        fprintf( stderr, " Use `sudo` to run %s to correct information if some informations are displayed as empty.\n",
                  ME_STR );
     }
 #endif /// of __linux__
