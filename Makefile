@@ -39,11 +39,17 @@ ifeq ($(KRNL),Darwin)
     OPTLIBS += -framework CoreFoundation
     OPTLIBS += -framework Security
 else
-#    CFLAGS += -s
+    CFLAGS += -s
     ifeq ($(KRNL),Linux)
         OPTLIBS += -ludev -lpthread
     else
-	# currently no plan to support other OS.
+        # split kernel names, case of MinGW.
+        KERNEL_SS := $(shell echo $(KRNL) | cut -d _ -f1 )
+        ifeq ($(KERNEL_SS),MINGW64)
+            CFLAGS += -mconsole
+            LFLAGS += -static
+        endif
+        # currently no plan to support other OS.
     endif
 endif
 
