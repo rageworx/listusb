@@ -1255,7 +1255,7 @@ size_t treelistdevs()
             {
                 printf( "\033[92m" );
             }
-            printf( "%zu devices\n", usbtree[cnt]->bus, usbtree[cnt]->device.size() );
+            printf( "%zu devices\n", usbtree[cnt]->device.size() );
 
             for( size_t itr=0; itr<usbtree[cnt]->device.size(); itr++ )
             {
