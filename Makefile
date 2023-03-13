@@ -7,7 +7,7 @@ GCC      = gcc
 GPP      = g++
 AR       = ar
 WRC      =
-LIBARCH  = 
+LIBARCH  =
 OPTARCH  =
 BENDFIX  = unknown
 OPTLIBS  =
@@ -46,8 +46,11 @@ else
         # split kernel names, case of MinGW.
         KERNEL_SS := $(shell echo $(KRNL) | cut -d _ -f1 )
         ifeq ($(KERNEL_SS),MINGW64)
-            CFLAGS += -mconsole
+            CFLAGS += -mconsole -Ires
+            WFLAGS += -Ires
             LFLAGS += -static
+            WRC = windres
+            WROBJ = $(TARGET_OBJ)/resource.o
         endif
         # currently no plan to support other OS.
     endif
@@ -72,7 +75,7 @@ include .config
 LIBUSB_INC = $(LIBUSBDIR)/libusb
 LIBUSB_LIB = $(LIBUSB_INC)/.libs
 
-# Compiler optiops 
+# Compiler optiops
 COPTS += -std=c++11
 COPTS += -fomit-frame-pointer -O2
 #COPTS += -g3 -DDEBUG
@@ -116,8 +119,12 @@ $(OBJS): $(TARGET_OBJ)/%.o: $(SRC_PATH)/%.cpp
 	@echo "Building $@ ... "
 	@$(GPP) $(CFLAGS) -c $< -o $@
 
-$(TARGET_DIR)/$(TARGET_PKG): $(OBJS)
-	@echo "Generating $@ ..."
+$(WROBJ): res/resource.rc
+	@echo "Building windows resource ..."
+	@$(WRC) -i $< $(WFLAGS) -o $@
+
+$(TARGET_DIR)/$(TARGET_PKG): $(OBJS) $(WROBJ)
+	@echo "Linking $@ ..."
 	@$(GPP) $^ $(CFLAGS) $(LFLAGS)  -o $@
 	@echo "done."
 
@@ -128,4 +135,3 @@ install:
 uninstall:
 	@echo "Unintalling ..."
 	@rm -f $(INSTALLDIR)/$(TARGET_PKG)
-

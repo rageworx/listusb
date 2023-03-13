@@ -12,6 +12,8 @@
 #include <cctype>
 #include <vector>
 
+#include "resource.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 using namespace std;
@@ -19,7 +21,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 
 #define ME_STR              "listusb"
-#define VERSION_STR         "0.2.2.17"
+#define VERSION_STR         APP_VERSION_STR
 
 #define SLEN_MANUFACTURER   128
 #define SLEN_PRODUCT        128
