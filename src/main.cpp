@@ -1348,6 +1348,10 @@ void showVersion()
 
 int main( int argc, char** argv )
 {
+#ifdef DEBUG_LIBUSB
+    putenv( "LIBUSB_DEBUG=4" );
+#endif
+
     // getopt
     for(;;)
     {
