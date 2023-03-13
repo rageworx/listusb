@@ -46,7 +46,7 @@ else
         # split kernel names, case of MinGW.
         KERNEL_SS := $(shell echo $(KRNL) | cut -d _ -f1 )
         ifeq ($(KERNEL_SS),MINGW64)
-            CFLAGS += -mconsole -Ires
+            CFLAGS += -mconsole
             WFLAGS += -Ires
             LFLAGS += -static
             WRC = windres
@@ -84,6 +84,7 @@ COPTS += $(OPTARCH)
 # CC FLAGS
 CFLAGS += -I$(LIBUSB_INC)
 CFLAGS += -I$(SRC_PATH)
+CFLAGS += -Ires
 CFLAGS += $(DEFS)
 CFLAGS += $(COPTS)
 
