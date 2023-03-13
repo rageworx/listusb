@@ -66,7 +66,6 @@ INSTALLDIR = /usr/local/bin
 TARGET_PKG = listusb
 TARGET_DIR = ./bin
 TARGET_OBJ = ./obj
-TARGET_ASM = ./asm
 
 # .config required
 include .config
@@ -108,7 +107,6 @@ continue: $(TARGET_DIR)/$(TARGET_PKG)
 prepare:
 	@mkdir -p $(TARGET_DIR)
 	@mkdir -p $(TARGET_OBJ)
-	@mkdir -p $(TARGET_ASM)
 
 clean:
 	@echo "Cleaning built targets ..."
