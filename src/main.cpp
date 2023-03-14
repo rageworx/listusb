@@ -1497,7 +1497,7 @@ int main( int argc, char** argv )
     lusbopt[0].value.ival = 0;
     libusb_init_context( &libusbctx, lusbopt, 1 );
 #else
-    libusb_init_context( &libusbctx );
+    libusb_init( &libusbctx );
 #endif
 
     if ( libusbctx != NULL )
