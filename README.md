@@ -15,7 +15,7 @@ A tool that detailed listing USB device for macOS, Linux, MSYS2 shells and conso
 
 ```
 >  listusb
-listusb, version 0.2.0.10, (C)Copyrighted 2023 Raphael Kim, w/ libusb v1.0.26
+listusb, version 0.2.2.18, (C)Copyrighted 2023 Raphael Kim, w/ libusb v1.0.26
 Bus 001, Port 000 [1B21:1242] (no manufacturer)(no product name)
     + (SN not found)
     + Class = HUB device
@@ -87,6 +87,7 @@ Bus 002, Port 009 [04B4:0101] (no manufacturer)Cypress USB Keyboard / PS2 Mouse
 
 * There's more xterm escape coloring option for `-c` or `--color`.
 * Also simple view with `-s` or `--simple`.
+* Tree view availed with `-t` or `--tree`.
 
 ## Manual configuration
 
