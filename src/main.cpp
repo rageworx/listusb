@@ -724,7 +724,7 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
                                 }
                                 else
                                 {
-                                    printf( "0x%X", (uint8_t)*pE );
+                                    printf( "0x%02X", (uint8_t)*pE );
                                 }
                             }
                             else
@@ -1448,7 +1448,7 @@ int main( int argc, char** argv )
     {
         if ( optpar_color > 0 )
         {
-            printf( "\033[93m" );
+            printf( "\033[97m" );
         }
         printf( "%s", ME_STR );
         if ( optpar_color > 0 )
