@@ -41,6 +41,7 @@ ifeq ($(KRNL),Darwin)
 else
     CFLAGS += -s
     ifeq ($(KRNL),Linux)
+        CFLAGS += -static-libstdc++
         OPTLIBS += -ludev -lpthread
     else
         # split kernel names, case of MinGW.
