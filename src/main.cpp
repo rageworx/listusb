@@ -58,6 +58,7 @@ static struct option long_opts[] = {
     { "version",        no_argument,        0, 'v' },
     { "color",          no_argument,        0, 'c' },
     { "lessinfo",       no_argument,        0, 'L' },
+    { "powercontrol",   required_argument,  0, 'p' },
     { NULL, 0, 0, 0 }
 };
 
@@ -66,6 +67,8 @@ static uint32_t         optpar_simple       = 0;
 static uint32_t         optpar_color        = 0;
 static uint32_t         optpar_lessinfo     = 0;
 static uint32_t         optpar_treeview     = 0;
+static uint32_t         optpar_powercontrol = 0;
+static char*            optpar_powercontrol_args = NULL;
 static libusb_context*  libusbctx           = NULL;
 static usbdevtree       usbtree;
 
@@ -1479,6 +1482,130 @@ size_t treelistdevs()
     return devscnt;
 }
 
+size_t devpwrctrk( int a, int b, int f )
+{
+    libusb_device_handle* dev = NULL;
+    libusb_device** listdev = NULL;
+    size_t devscnt = libusb_get_device_list( libusbctx, &listdev );
+
+    if ( devscnt > 0 )
+    {
+        for ( size_t cnt = 0; cnt<devscnt; cnt++ )
+        {
+            libusb_device* device = listdev[cnt];
+            libusb_device_descriptor desc = {0};
+            libusb_config_descriptor* cfg;
+            usbdevdevinfo* curDevInfo = NULL;
+            bool founddev = false;
+
+            if ( libusb_get_device_descriptor( device, &desc ) == 0 )
+            {
+                uint8_t dev_bus  = libusb_get_bus_number( device );
+                uint8_t dev_port = libusb_get_port_number( device );
+
+                if ( usbtree.size() == 0 )
+                {
+                    // first one
+                    alloc_append_businfo( &usbtree, 1 );
+                    usbtree[0]->bus = dev_bus;
+                    alloc_append_portdev( &usbtree, 0, 1 );
+                    curDevInfo = usbtree[0]->device[0];
+                }
+                else /// find same bus or not.
+                {
+                    bool foundBUS = false;
+                    for ( size_t itr=0; itr<usbtree.size(); itr++ )
+                    {
+                        if ( usbtree[itr]->bus == dev_bus )
+                        {
+                            foundBUS = true;
+                            alloc_append_portdev( &usbtree, itr, 1 );
+                            size_t cq = usbtree[itr]->device.size();
+                            if ( cq > 0 )
+                                cq--;
+                            curDevInfo = usbtree[itr]->device[cq];
+                            break;
+                        }
+                    }
+
+                    if ( foundBUS == false )
+                    {
+                        alloc_append_businfo( &usbtree, 1 );
+                        alloc_append_portdev( &usbtree, usbtree.size()-1, 1 );
+                        size_t cq = usbtree.size();
+                        if ( cq > 0 )
+                            cq--;
+                        usbtree[cq]->bus = dev_bus;
+                        curDevInfo = usbtree[usbtree.size()-1]->device[0];
+                    }
+                }
+
+                if ( curDevInfo != NULL )
+                {
+                    curDevInfo->port = dev_port;
+                    curDevInfo->vid  = desc.idVendor;
+                    curDevInfo->pid  = desc.idProduct;
+                }
+                
+                if ( ( dev_bus == a ) && ( curDevInfo->port == b ) )
+                {
+                    // open device ..
+                    int usberr = libusb_open( device, &dev );
+                    if ( usberr == 0 )
+                    {
+                        printf( "Transferring power control to bus %04, port %04X [%04X:%04X]... ",
+                                a, b,
+                                curDevInfo->vid, curDevInfo->pid );
+                        
+                        uint8_t pwrctrlv = 0x01;
+                        
+                        if ( f > 0 )
+                        {
+                            pwrctrlv = 0x00;
+                        }
+                        
+                        int ret = \
+                        libusb_control_transfer( dev, 
+                                                 0x40, /// request type 0x40
+                                                 0x02, /// request
+                                                 pwrctrlv, /// value
+                                                 ((0x0B<<8)|(0xDA)),  /// index
+                                                 0, /// data
+                                                 0, /// length 
+                                                 100000 ); /// timeout.
+                                                 
+                        if ( ret != LIBUSB_SUCCESS )
+                        {
+                            fprintf( stderr, "Failure by %d\n", ret );
+                        }
+                        else
+                        {
+                            printf( "Ok.\n" );
+                        }
+                    }
+                    else
+                    {
+                        fprintf( stderr, "Failed to open bus %04X, port %04X %04X [%04X:%04X].\n",
+                                 a, b,
+                                 curDevInfo->vid, curDevInfo->pid );
+                    }
+                }
+                else
+                {
+                    dev = NULL;
+                }
+
+                if ( dev != NULL )
+                    libusb_close( dev );
+            }
+        }
+
+        free_portdev( usbtree );
+    }
+
+    return devscnt;
+}
+
 void showHelp()
 {
     const char shortusage[] = \
@@ -1489,7 +1616,8 @@ void showHelp()
 "  -c,--color          display with xterm-color escape codes.\n"
 "  -r,--reftable       display reference table section with --simple.\n"
 "  -L,--lessinfo       display information lesser than normal case.\n"
-"  -t,--tree           display USB device tree ( not implemented )\n";
+"  -t,--tree           display USB device tree ( not implemented )\n"
+"  -p,--powercontrol   control power by BUS,PORT,0|1 to device on/off\n";
 
     fprintf( stdout, shortusage, ME_STR );
 }
@@ -1521,7 +1649,7 @@ int main( int argc, char** argv )
     {
         int optidx = 0;
         int opt = getopt_long( argc, argv,
-                               " :hvsctrL",
+                               " :hvsctrLp:",
                                long_opts, &optidx );
         if ( opt >= 0 )
         {
@@ -1554,6 +1682,14 @@ int main( int argc, char** argv )
 
                 case 'L':
                     optpar_lessinfo = 1;
+                    break;
+                    
+                case 'p':
+                    optpar_powercontrol = 1;
+                    if ( optarg != NULL )
+                    {
+                        optpar_powercontrol_args = strdup( optarg );
+                    }
                     break;
             }
         }
@@ -1620,6 +1756,49 @@ int main( int argc, char** argv )
     if ( libusbctx != NULL )
     {
         size_t devs = 0;
+
+        if ( ( optpar_powercontrol > 0 ) && ( optpar_powercontrol_args != NULL ) )
+        {
+            // separate params by ','
+            char* pTok = strtok( optpar_powercontrol_args, "," );
+            size_t qTok = 0;
+            char* pars[3] = { NULL, NULL, NULL };
+            
+            while( pTok != NULL )
+            {
+                if ( qTok < 3 )
+                    pars[qTok] = strdup( pTok );
+                else
+                    break;
+                
+                qTok++;
+                pTok = strtok( NULL, "," );
+            }
+
+            if ( qTok < 3 )
+            {
+                fprintf( stderr, "not enough parameters.\n" );
+            }
+            else
+            {
+                int npars[3] = { 0, 0, 0 };
+                for( size_t cnt=0; cnt<3; cnt++ )
+                    npars[cnt] = atoi( pars[cnt] );
+                
+                devpwrctrk( npars[0], npars[1], npars[2] );
+            }
+            
+            for ( size_t cnt=0; cnt<3; cnt ++ )
+            {
+                if ( pars[cnt] != NULL )
+                {
+                    delete[] pars[cnt];
+                }
+            }
+            
+            delete[] optpar_powercontrol_args;
+            return 0;
+        }
 
         if ( optpar_treeview == 0 )
         {
