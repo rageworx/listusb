@@ -450,6 +450,84 @@ const char* bcd2human( uint16_t id )
     return retstr;
 }
 
+void prtEndPoint( uint8_t bits )
+{
+    printf( "%02X (", bits );
+
+    if ( optpar_color > 0 )
+    {
+        printf( "\033[31m" );
+    }
+
+    uint8_t testbit = bits & LIBUSB_TRANSFER_TYPE_MASK;
+    
+    if ( ( testbit & LIBUSB_ENDPOINT_TRANSFER_TYPE_CONTROL ) > 0 )
+    {
+        printf ( "Control, " );
+    }
+    
+    if ( ( testbit & LIBUSB_ENDPOINT_TRANSFER_TYPE_ISOCHRONOUS  ) > 0 )
+    {
+        printf( "Isochronous, " );
+    }
+    
+    if ( ( testbit & LIBUSB_ENDPOINT_TRANSFER_TYPE_BULK  ) > 0 )
+    {
+        printf( "Bulk, " );
+    }
+    
+    if ( ( testbit & LIBUSB_ENDPOINT_TRANSFER_TYPE_INTERRUPT ) > 0 )
+    {
+        printf( "Interrupt, " );
+    }
+    
+    testbit = bits & LIBUSB_ISO_SYNC_TYPE_MASK;
+    
+    if ( ( testbit & LIBUSB_ISO_SYNC_TYPE_NONE  ) > 0 )
+    {
+        printf( "No-Sync, " );
+    }
+    
+    if ( ( testbit & LIBUSB_ISO_SYNC_TYPE_ASYNC ) > 0 )
+    {
+        printf( "Asynchronous, " );
+    }
+    
+    if ( ( testbit & LIBUSB_ISO_SYNC_TYPE_ADAPTIVE  ) > 0 )
+    {
+        printf( "Adaptive, " );
+    }
+    
+    if ( ( testbit & LIBUSB_ISO_SYNC_TYPE_SYNC  ) > 0 )
+    {
+        printf( "Synchronous, " );
+    }
+    
+    testbit = bits & LIBUSB_ISO_USAGE_TYPE_MASK;
+    
+    if ( ( testbit & LIBUSB_ISO_USAGE_TYPE_DATA  ) > 0 )
+    {
+        printf( "Data, ");
+    }
+
+    if ( ( testbit & LIBUSB_ISO_USAGE_TYPE_FEEDBACK ) > 0 )
+    {
+        printf( "Feedback , ");
+    }
+
+    if ( ( testbit & LIBUSB_ISO_USAGE_TYPE_IMPLICIT ) > 0 )
+    {
+        printf( "Implicit feedback Data, ");
+    }
+
+    if ( optpar_color > 0 )
+    {
+        printf( "\033[92m" );
+    }
+    
+    printf( ")", bits );
+}
+
 void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx, uint16_t bcd, libusb_config_descriptor* cfg )
 {
     if ( cfg != NULL )
@@ -714,6 +792,23 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
 
                         for ( int z=0; z<cfg->interface[x].altsetting[y].bNumEndpoints; z++ )
                         {
+                            if ( cfg->interface[x].altsetting[y].endpoint[z].bmAttributes > 0 )
+                            {
+                                prtEndPoint( cfg->interface[x].altsetting[y].endpoint[z].bmAttributes );
+                            }
+                            
+                            uint8_t dirbit = cfg->interface[x].altsetting[y].endpoint[z].bEndpointAddress & LIBUSB_ENDPOINT_DIR_MASK;
+                            
+                            if ( dirbit == LIBUSB_ENDPOINT_OUT )
+                            {
+                                printf( "EP:OUT " );
+                            }
+                            else
+                            if ( dirbit == LIBUSB_ENDPOINT_IN )
+                            {
+                                printf( "EP:IN " );
+                            }
+                            
                             if ( cfg->interface[x].altsetting[y].endpoint[z].extra_length > 0 )
                             {
                                 const char* pE = (const char*)cfg->interface[x].altsetting[y].endpoint[z].extra;
@@ -865,7 +960,7 @@ size_t listdevs()
 
                     if ( optpar_color > 0 )
                     {
-                        printf( "\033[93m" );
+                        printf( "\033[94m" );
                     }
                     printf( "Port " );
                     if ( optpar_color > 0 )
