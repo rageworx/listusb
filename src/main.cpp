@@ -537,7 +537,7 @@ void prtEndPoint( uint8_t bits )
         printf( "\033[92m" );
     }
     
-    printf( ")", bits );
+    printf( ")" );
 }
 
 void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx, uint16_t bcd, libusb_config_descriptor* cfg )
