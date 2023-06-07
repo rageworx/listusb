@@ -148,25 +148,35 @@ void free_portdev( usbdevtree& udt )
     udt.clear();
 }
 
-void prtUSBclass( uint8_t id, uint8_t subid )
+void prtUSBclass( uint8_t id, uint8_t subid, bool simpleovr = false )
 {
     if ( optpar_color > 0 )
     {
         printf( "\033[94m" );
     }
 
-    if ( optpar_simple == 0 )
+    if ( simpleovr == false )
     {
-        printf( "Class = " );
+        if ( optpar_simple == 0 )
+        {
+            printf( "Class = " );
+        }
+        else
+        {
+            printf( "cls=" );
+        }
+        
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[93m" );
+        }
     }
     else
     {
-        printf( "cls=" );
-    }
-
-    if ( optpar_color > 0 )
-    {
-        printf( "\033[93m" );
+        if ( optpar_color > 0 )
+        {
+            printf( "\033[31m" );
+        }        
     }
 
     switch( id )
@@ -321,7 +331,7 @@ void prtUSBclass( uint8_t id, uint8_t subid )
         printf( "\033[0m" );
     }
 
-    if ( optpar_simple == 0 )
+    if ( ( optpar_simple == 0 ) && ( simpleovr == false ) )
         printf( "\n" );
 }
 
@@ -458,6 +468,8 @@ void prtEndPoint( uint8_t bits )
     {
         printf( "\033[31m" );
     }
+
+    printf( " " );
 
     uint8_t testbit = bits & LIBUSB_TRANSFER_TYPE_MASK;
     
@@ -734,6 +746,18 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
 
                     if ( cfg->interface[x].num_altsetting > 0 )
                     {
+                        printf( " : " );
+                        for ( size_t q=0; q<cfg->interface[x].num_altsetting; q++ )
+                        {
+                            prtUSBclass( cfg->interface[x].altsetting[q].bInterfaceClass, 
+                                         cfg->interface[x].altsetting[q].bInterfaceSubClass,
+                                         true );
+                            if ( q+1 < cfg->interface[x].num_altsetting )
+                            {
+                                printf( ", " );
+                            }
+                        }
+
                         printf( "\n" );
                         
                         for( int y=0; y<cfg->interface[x].num_altsetting; y++ )
@@ -756,6 +780,7 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
                             {
                                 printf( "\033[96m" );
                             }
+
 
                             printf( "]" );
 
@@ -796,12 +821,12 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
                                 
                                 if ( dirbit == LIBUSB_ENDPOINT_OUT )
                                 {
-                                    printf( ", EP:OUT, " );
+                                    printf( " EP:OUT, " );
                                 }
                                 else
                                 if ( dirbit == LIBUSB_ENDPOINT_IN )
                                 {
-                                    printf( ", EP:IN, " );
+                                    printf( " EP:IN, " );
                                 }
                                 
                                 if ( cfg->interface[x].altsetting[y].endpoint[z].extra_length > 0 )
@@ -814,7 +839,10 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
                                     }
                                     else
                                     {
-                                        printf( "0x%02X", (uint8_t)*pE );
+                                        for ( size_t q=0; q<cfg->interface[x].altsetting[y].endpoint[z].extra_length; q++ )
+                                        {
+                                            printf( "%02X", (uint8_t)pE[q] );
+                                        }
                                     }
                                 }
 
