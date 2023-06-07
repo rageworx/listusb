@@ -732,123 +732,117 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
                         printf( "\033[97m" );
                     }
 
-                    printf( " -> " );
-
-                    if ( optpar_color > 0 )
+                    if ( cfg->interface[x].num_altsetting > 0 )
                     {
-                        printf( "\033[96m" );
-                    }
-
-                    printf( "(" );
-
-                    for( int y=0; y<cfg->interface[x].num_altsetting; y++ )
-                    {
-                        if ( optpar_color > 0 )
-                        {
-                            printf( "\033[96m" );
-                        }
-
-                        printf( "ep[" );
-
-                        if ( optpar_color > 0 )
-                        {
-                            printf( "\033[95m" );
-                        }
-
-                        printf( "%d", y );
-
-                        if ( optpar_color > 0 )
-                        {
-                            printf( "\033[96m" );
-                        }
-
-                        printf( "]" );
-
-                        if ( optpar_color > 0 )
-                        {
-                            printf( "\033[91m" );
-                        }
-
-                        printf( "=" );
-
-                        if ( optpar_color > 0 )
-                        {
-                            printf( "\033[92m" );
-                        }
-
-                        printf( "%d", cfg->interface[x].altsetting[y].bNumEndpoints );
-
-                        if ( optpar_color > 0 )
-                        {
-                            printf( "\033[95m" );
-                        }
-
-                        printf( ":" );
-
-                        if ( optpar_color > 0 )
-                        {
-                            printf( "\033[32m" );
-                        }
-
-                        for ( int z=0; z<cfg->interface[x].altsetting[y].bNumEndpoints; z++ )
-                        {
-                            if ( cfg->interface[x].altsetting[y].endpoint[z].bmAttributes > 0 )
-                            {
-                                prtEndPoint( cfg->interface[x].altsetting[y].endpoint[z].bmAttributes );
-                            }
-                            
-                            uint8_t dirbit = cfg->interface[x].altsetting[y].endpoint[z].bEndpointAddress & LIBUSB_ENDPOINT_DIR_MASK;
-                            
-                            if ( dirbit == LIBUSB_ENDPOINT_OUT )
-                            {
-                                printf( "EP:OUT " );
-                            }
-                            else
-                            if ( dirbit == LIBUSB_ENDPOINT_IN )
-                            {
-                                printf( "EP:IN " );
-                            }
-                            
-                            if ( cfg->interface[x].altsetting[y].endpoint[z].extra_length > 0 )
-                            {
-                                const char* pE = (const char*)cfg->interface[x].altsetting[y].endpoint[z].extra;
-
-                                if ( ( *pE >= '0' ) && ( *pE <= '9' ) )
-                                {
-                                    printf( "%c", *pE );
-                                }
-                                else
-                                {
-                                    printf( "0x%02X", (uint8_t)*pE );
-                                }
-                            }
-                            else
-                            {
-                                printf( "-" );
-                            }
-
-                            if (z+1 < cfg->interface[x].altsetting[y].bNumEndpoints )
-                            {
-                                printf( "," );
-                            }
-                        }
-
-                        if( y+1 < cfg->interface[x].num_altsetting )
+                        printf( "\n" );
+                        
+                        for( int y=0; y<cfg->interface[x].num_altsetting; y++ )
                         {
                             if ( optpar_color > 0 )
                             {
-                                printf( "\033[0m" );
+                                printf( "\033[96m" );
                             }
-                            printf( "," );
+
+                            printf( "            -> ep[" );
+
+                            if ( optpar_color > 0 )
+                            {
+                                printf( "\033[95m" );
+                            }
+
+                            printf( "%d", y );
+
+                            if ( optpar_color > 0 )
+                            {
+                                printf( "\033[96m" );
+                            }
+
+                            printf( "]" );
+
+                            if ( optpar_color > 0 )
+                            {
+                                printf( "\033[91m" );
+                            }
+
+                            printf( "=" );
+
+                            if ( optpar_color > 0 )
+                            {
+                                printf( "\033[92m" );
+                            }
+
+                            printf( "%d", cfg->interface[x].altsetting[y].bNumEndpoints );
+
+                            if ( optpar_color > 0 )
+                            {
+                                printf( "\033[95m" );
+                            }
+
+                            printf( ":" );
+
+                            if ( optpar_color > 0 )
+                            {
+                                printf( "\033[32m" );
+                            }
+
+                            for ( int z=0; z<cfg->interface[x].altsetting[y].bNumEndpoints; z++ )
+                            {
+                                if ( cfg->interface[x].altsetting[y].endpoint[z].bmAttributes > 0 )
+                                {
+                                    prtEndPoint( cfg->interface[x].altsetting[y].endpoint[z].bmAttributes );
+                                }
+                                
+                                uint8_t dirbit = cfg->interface[x].altsetting[y].endpoint[z].bEndpointAddress & LIBUSB_ENDPOINT_DIR_MASK;
+                                
+                                if ( dirbit == LIBUSB_ENDPOINT_OUT )
+                                {
+                                    printf( ", EP:OUT, " );
+                                }
+                                else
+                                if ( dirbit == LIBUSB_ENDPOINT_IN )
+                                {
+                                    printf( ", EP:IN, " );
+                                }
+                                
+                                if ( cfg->interface[x].altsetting[y].endpoint[z].extra_length > 0 )
+                                {
+                                    const char* pE = (const char*)cfg->interface[x].altsetting[y].endpoint[z].extra;
+
+                                    if ( ( *pE >= '0' ) && ( *pE <= '9' ) )
+                                    {
+                                        printf( "%c", *pE );
+                                    }
+                                    else
+                                    {
+                                        printf( "0x%02X", (uint8_t)*pE );
+                                    }
+                                }
+
+                                if ( z+1 < cfg->interface[x].altsetting[y].bNumEndpoints )
+                                {
+                                    printf( "\n                       " );
+                                }
+                            }
+
+                            if( y+1 < cfg->interface[x].num_altsetting )
+                            {
+                                if ( optpar_color > 0 )
+                                {
+                                    printf( "\033[0m" );
+                                }
+                                
+                                printf( "\n" );
+                            }
                         }
+
+                        if ( optpar_color > 0 )
+                        {
+                            printf( "\033[96m" );
+                        }
+                        
+                        printf( "\n" );
                     }
 
-                    if ( optpar_color > 0 )
-                    {
-                        printf( "\033[96m" );
-                    }
-
-                    printf( ")\n" );
 
                     if ( optpar_color > 0 )
                     {
