@@ -805,13 +805,13 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
 
                             printf( ":" );
 
-                            if ( optpar_color > 0 )
-                            {
-                                printf( "\033[32m" );
-                            }
-
                             for ( int z=0; z<cfg->interface[x].altsetting[y].bNumEndpoints; z++ )
                             {
+                                if ( optpar_color > 0 )
+                                {
+                                    printf( "\033[32m" );
+                                }
+                                
                                 if ( cfg->interface[x].altsetting[y].endpoint[z].bmAttributes > 0 )
                                 {
                                     prtEndPoint( cfg->interface[x].altsetting[y].endpoint[z].bmAttributes );
@@ -831,6 +831,11 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
                                 
                                 if ( cfg->interface[x].altsetting[y].endpoint[z].extra_length > 0 )
                                 {
+                                    if ( optpar_color > 0 )
+                                    {
+                                        printf( "\033[33m" );
+                                    }
+
                                     const char* pE = (const char*)cfg->interface[x].altsetting[y].endpoint[z].extra;
 
                                     if ( ( *pE >= '0' ) && ( *pE <= '9' ) )
