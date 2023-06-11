@@ -14,75 +14,20 @@ A tool that detailed listing USB device for macOS, Linux, MSYS2 shells and conso
 * Build source, and install to user space, then type `listusb`.
 
 ```
->  listusb
-listusb, version 0.2.2.18, (C)Copyrighted 2023 Raphael Kim, w/ libusb v1.0.26
-Bus 001, Port 000 [1B21:1242] (no manufacturer)(no product name)
-    + (SN not found)
-    + Class = HUB device
-    + bcdID = 0300, human readable = USB 3.0
-    + config[ 0], interfaces = 1, ID = 0x01, max required power = 0 mA
-        - interface[0] : alt.settings = 1 -> (ep[0]=1:0x6)
-Bus 001, Port 004 [2109:2812] (no manufacturer)(no product name)
-    + (SN not found)
-    + Class = HUB device
-    + bcdID = 0210, human readable = USB 2.1
-    + config[ 0], interfaces = 1, ID = 0x01, max required power = 0 mA
-        - interface[0] : alt.settings = 1 -> (ep[0]=1:-)
-Bus 002, Port 004 [062A:4101] MOSART Semi., 2.4G Keyboard Mouse
-    + (SN not found)
-    + bcdID = 0110, human readable = USB 1.1
-    + config[ 0], interfaces = 2, ID = 0x01, max required power = 100 mA
-        - interface[0] : alt.settings = 1 -> (ep[0]=1:-)
-        - interface[1] : alt.settings = 1 -> (ep[0]=1:-)
-Bus 001, Port 002 [2109:0812] (no manufacturer)(no product name)
-    + (SN not found)
-    + Class = HUB device
-    + bcdID = 0300, human readable = USB 3.0
-    + config[ 0], interfaces = 1, ID = 0x01, max required power = 0 mA
-        - interface[0] : alt.settings = 1 -> (ep[0]=1:0x6)
-Bus 002, Port 022 [2109:0812] (no manufacturer)(no product name)
-    + (SN not found)
-    + Class = HUB device
-    + bcdID = 0300, human readable = USB 3.0
-    + config[ 0], interfaces = 1, ID = 0x01, max required power = 0 mA
-        - interface[0] : alt.settings = 1 -> (ep[0]=1:0x6)
-Bus 002, Port 004 [05E3:0608] (no manufacturer)(no product name)
-    + (SN not found)
-    + Class = HUB device
-    + bcdID = 0200, human readable = USB 2.0
-    + config[ 0], interfaces = 1, ID = 0x01, max required power = 100 mA
-        - interface[0] : alt.settings = 1 -> (ep[0]=1:-)
-Bus 002, Port 010 [046D:C332] Logitech, Gaming Mouse G502
-    + Serial number = 188338753330
-    + bcdID = 0200, human readable = USB 2.0
-    + config[ 0], interfaces = 2, ID = 0x01, max required power = 300 mA
-        - interface[0] : alt.settings = 1 -> (ep[0]=1:-)
-        - interface[1] : alt.settings = 1 -> (ep[0]=1:-)
-Bus 002, Port 006 [2109:2812] (no manufacturer)(no product name)
-    + (SN not found)
-    + Class = HUB device
-    + bcdID = 0210, human readable = USB 2.1
-    + config[ 0], interfaces = 1, ID = 0x01, max required power = 0 mA
-        - interface[0] : alt.settings = 1 -> (ep[0]=1:-)
-Bus 002, Port 000 [8086:A2AF] (no manufacturer)(no product name)
-    + (SN not found)
-    + Class = HUB device
-    + bcdID = 0300, human readable = USB 3.0
-    + config[ 0], interfaces = 1, ID = 0x01, max required power = 0 mA
-        - interface[0] : alt.settings = 1 -> (ep[0]=1:0x6)
-Bus 001, Port 003 [0D8C:000C] (no manufacturer)C-Media USB Headphone Set
-    + (SN not found)
-    + bcdID = 0110, human readable = USB 1.1
-    + config[ 0], interfaces = 3, ID = 0x01, max required power = 500 mA
-        - interface[0] : alt.settings = 1 -> (ep[0]=0:)
-        - interface[1] : alt.settings = 2 -> (ep[0]=0:,ep[1]=1:0x7)
-        - interface[2] : alt.settings = 1 -> (ep[0]=1:-)
-Bus 002, Port 009 [04B4:0101] (no manufacturer)Cypress USB Keyboard / PS2 Mouse
-    + (SN not found)
-    + bcdID = 0110, human readable = USB 1.1
-    + config[ 0], interfaces = 2, ID = 0x01, max required power = 100 mA
-        - interface[0] : alt.settings = 1 -> (ep[0]=1:-)
-        - interface[1] : alt.settings = 1 -> (ep[0]=1:-)
+>  bin/listusb -c
+listusb, version 0.2.3.25, (C)Copyrighted 2023 Raphael Kim, w/ libusb v1.0.26
+Bus 001, Port 002 [0BDA:9210] Realtek, RTL9210-VB
+    + Serial number = 821027768393
+    + bcdID = 0320, human readable = USB 3.2
+    + config[ 0], interfaces = 1, ID = 0x01, max required power = 896 mA
+        - interface[0] : alt.settings = 2 : Mass storage device, Mass storage device
+            -> ep[0]=2:02 ( Bulk, Interrupt, ) EP:IN, 06300F000000
+                       02 ( Bulk, Interrupt, ) EP:OUT, 06300F000000
+            -> ep[1]=4:02 ( Bulk, Interrupt, ) EP:IN, 06300F05000004240300
+                       02 ( Bulk, Interrupt, ) EP:OUT, 06300F05000004240400
+                       02 ( Bulk, Interrupt, ) EP:IN, 06300F05000004240200
+                       02 ( Bulk, Interrupt, ) EP:OUT, 06300000000004240100
+total 1 device found.
 ```
 
 * There's more xterm escape coloring option for `-c` or `--color`.
