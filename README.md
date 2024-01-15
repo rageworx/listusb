@@ -15,7 +15,7 @@ A tool that detailed listing USB device for macOS, Linux, MSYS2 shells and conso
 
 ```
 >  bin/listusb -c
-listusb, version 0.2.3.25, (C)Copyrighted 2023 Raphael Kim, w/ libusb v1.0.26
+listusb, version 0.2.3.27, (C)Copyrighted 2023 Raphael Kim, w/ libusb v1.0.27
 Bus 001, Port 002 [0BDA:9210] Realtek, RTL9210-VB
     + Serial number = 821027768393
     + bcdID = 0320, human readable = USB 3.2
