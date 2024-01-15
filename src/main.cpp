@@ -658,7 +658,7 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
         }
 
         uint32_t pwrCalc = cfg->MaxPower;
-        if ( bcd > 0x0300 )
+        if ( bcd >= 0x0300 )
         {
             pwrCalc *= 8;
         }
