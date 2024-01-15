@@ -40,7 +40,7 @@ total 1 device found.
 
 ## Reuired external library,
 
-### libusb-1.0.26 ( for macOS )
+### libusb-1.0.26 or later ( for macOS )
 
 * Clone [libusb tag v1.0.26](https://github.com/libusb/libusb/tree/v1.0.26) or [lisbusb latest](https://github.com/libusb/libusb) to your sources managing directory,
 * Need to modify libusb-1.0.26 Makefile to including this options for
