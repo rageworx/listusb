@@ -11,7 +11,7 @@ A tool that detailed listing USB device for macOS, Linux, MSYS2 shells and conso
 
 ## Easy to read
 
-* Build source, and install to user space, then type `listusb`.
+* Build source, and install to user space, then type `listusb`[^1].
 
 ```
 >  bin/listusb -c
@@ -40,8 +40,7 @@ total 1 device found.
 
 ## Reuired external library,
 
-### libusb-1.0.26 or later ( for macOS )
-
+[^1]: libusb-1.0.26 or later ( for macOS )
 * Clone [libusb tag v1.0.26](https://github.com/libusb/libusb/tree/v1.0.26) or [lisbusb latest](https://github.com/libusb/libusb) to your sources managing directory,
 * Need to modify libusb-1.0.26 Makefile to including this options for
   - `-arch x86_64 -arch arm64 -mmacosx-version-min=11.0` to
