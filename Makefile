@@ -38,6 +38,9 @@ ifeq ($(KRNL),Darwin)
     OPTLIBS += -framework Cocoa -framework Foundation -framework IOKit
     OPTLIBS += -framework CoreFoundation
     OPTLIBS += -framework Security
+    APPVER = ${shell ./makefiles/verstrip.sh}
+    APPVER_C = ${shell ./makefiles/verstrip.sh --compat}
+    VERFLAGS += -current_version ${APPVER_C} -compatibility_version ${APPVER_C}
 else
     CFLAGS += -s
     ifeq ($(KRNL),Linux)
@@ -113,7 +116,6 @@ clean:
 	@echo "Cleaning built targets ..."
 	@rm -rf $(TARGET_DIR)/$(TARGET_PKG)
 	@rm -rf $(TARGET_OBJ)/*.o
-	@rm -rf asm/*.s
 
 $(OBJS): $(TARGET_OBJ)/%.o: $(SRC_PATH)/%.cpp
 	@echo "Building $@ ... "
@@ -125,7 +127,9 @@ $(WROBJ): res/resource.rc
 
 $(TARGET_DIR)/$(TARGET_PKG): $(OBJS) $(WROBJ)
 	@echo "Linking $@ ..."
-	@$(GPP) $^ $(CFLAGS) $(LFLAGS)  -o $@
+	@$(GPP) $^ $(CFLAGS) $(LFLAGS) -o $@
+	@echo "Stripping $@ ..."
+	@strip -S $@
 	@echo "done."
 
 install:

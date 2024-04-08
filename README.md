@@ -11,11 +11,11 @@ A tool that detailed listing USB device for macOS, Linux, MSYS2 shells and conso
 
 ## Easy to read
 
-* Build source, and install to user space, then type `listusb`.
+* Build source, and install to user space, then type `listusb`[^1].
 
 ```
 >  bin/listusb -c
-listusb, version 0.2.3.25, (C)Copyrighted 2023 Raphael Kim, w/ libusb v1.0.26
+listusb, version 0.2.3.27, (C)Copyrighted 2023 Raphael Kim, w/ libusb v1.0.27
 Bus 001, Port 002 [0BDA:9210] Realtek, RTL9210-VB
     + Serial number = 821027768393
     + bcdID = 0320, human readable = USB 3.2
@@ -40,8 +40,7 @@ total 1 device found.
 
 ## Reuired external library,
 
-### libusb-1.0.26 ( for macOS )
-
+[^1]: libusb-1.0.26 or later ( for macOS )
 * Clone [libusb tag v1.0.26](https://github.com/libusb/libusb/tree/v1.0.26) or [lisbusb latest](https://github.com/libusb/libusb) to your sources managing directory,
 * Need to modify libusb-1.0.26 Makefile to including this options for
   - `-arch x86_64 -arch arm64 -mmacosx-version-min=11.0` to
