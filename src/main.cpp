@@ -32,6 +32,7 @@ using namespace std;
 
 typedef struct _usbdevinfo {
     uint8_t     port;
+    uint8_t     parent_port;
     uint16_t    vid;
     uint16_t    pid;
     uint16_t    bcd;
@@ -559,7 +560,9 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
         }
 
         if ( optpar_simple == 0 )
-            printf( "    + ");
+        {
+           printf( "    + ");
+        }
 
         if ( strlen( (const char*)cfgstr ) > 0 )
         {
@@ -767,7 +770,7 @@ void prtUSBConfig( libusb_device* device, libusb_device_handle* dev, uint8_t idx
                                 printf( "\033[96m" );
                             }
 
-                            printf( "            -> ep[" );
+                          printf( "            -> ep[" );
 
                             if ( optpar_color > 0 )
                             {
@@ -970,7 +973,8 @@ size_t listdevs()
             if ( libusb_get_device_descriptor( device, &desc ) == 0 )
             {
                 uint8_t dev_bus = libusb_get_bus_number( device );
-                uint8_t dev_port = libusb_get_port_number( device );
+                uint8_t dev_path[8] = {0};
+                int32_t r = libusb_get_port_numbers( device, dev_path, 8 );
 
                 if ( optpar_simple == 0 )
                 {
@@ -994,7 +998,14 @@ size_t listdevs()
                     {
                         printf( "\033[97m" );
                     }
-                    printf( "%03u ", dev_port );
+                    if ( r > 0 )
+                    {
+                        printf( "%02u ", dev_path[r-1] );
+                    }
+                    else
+                    {
+                        printf( "%02u ", 0 );
+                    }
                 }
                 else
                 {
@@ -1007,7 +1018,16 @@ size_t listdevs()
                     {
                         printf( "\033[97m" );
                     }
-                    printf( "%03u;", dev_port );
+                    // printf( "%03u;", dev_port );
+                    if ( r > 0 )
+                    {
+                        printf( "%02u;", dev_path[r-1] );
+                    }
+                    else
+                    {
+                        printf( "%02u;", 0 );
+                    }
+ 
                 }
 
                 if ( optpar_color > 0 )
@@ -1286,6 +1306,10 @@ size_t treelistdevs()
             {
                 uint8_t dev_bus = libusb_get_bus_number( device );
                 uint8_t dev_port = libusb_get_port_number( device );
+                uint8_t dev_path[8] = {0};
+                int32_t dev_portscnt = libusb_get_port_numbers( device,
+                                                                dev_path,
+                                                                8 );
 
                 if ( usbtree.size() == 0 )
                 {
@@ -1329,6 +1353,15 @@ size_t treelistdevs()
                     curDevInfo->port = dev_port;
                     curDevInfo->vid  = desc.idVendor;
                     curDevInfo->pid  = desc.idProduct;
+                    if ( dev_portscnt > 1 )
+                    {
+                        curDevInfo->parent_port = \
+                            dev_path[ dev_portscnt - 1 ];
+                    }
+                    else
+                    {
+                        curDevInfo->parent_port = 0;
+                    }
                 }
 
                 // open device ..
@@ -1422,6 +1455,16 @@ size_t treelistdevs()
                 {
                     printf( "\033[93m" );
                 }
+                
+                for( int8_t x=0; x<usbtree[cnt]->device[itr]->parent_port; x++ )
+                {
+                    printf ( "  " );
+                }
+                if ( usbtree[cnt]->device[itr]->parent_port > 0 )
+                {
+                    printf( "(%u)",  usbtree[cnt]->device[itr]->parent_port > 0 );
+                }
+
                 printf( "  +-- " );
 
                 if ( optpar_color > 0 )
@@ -1568,7 +1611,7 @@ int main( int argc, char** argv )
 
     // check envs 
     const char* colParam = getenv( "LISTUSB_COLOR" );
-    if ( colParam != nullptr )
+    if ( ( colParam != nullptr ) && ( optpar_color == 0 ) )
     {
         optpar_color = atoi( colParam );
     }
