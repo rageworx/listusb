@@ -1566,6 +1566,14 @@ int main( int argc, char** argv )
             break;
     } /// of for( == )
 
+    // check envs 
+    const char* colParam = getenv( "LISTUSB_COLOR" );
+    if ( colParam != nullptr )
+    {
+        optpar_color = atoi( colParam );
+    }
+
+    // continue to print something -
     if ( optpar_simple == 0 )
     {
         if ( optpar_color > 0 )
